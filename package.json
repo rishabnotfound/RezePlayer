@@ -1,5 +1,4 @@
 {
-  "packageManager": "pnpm@9.14.4",
   "name": "Evelyn-Player",
   "version": "4.7.0",
   "private": true,
@@ -7,8 +6,7 @@
   "scripts": {
     "dev": "vite --config vite.standalone.config.mts --host",
     "build": "vite build --config vite.standalone.config.mts",
-    "preview": "vite preview --config vite.standalone.config.mts",
-    "preinstall": "npx -y only-allow pnpm"
+    "preview": "vite preview --config vite.standalone.config.mts"
   },
   "browserslist": {
     "production": [
