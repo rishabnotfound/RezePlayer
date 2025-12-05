@@ -82,8 +82,14 @@ export function SubtitleRenderer() {
   const overrideCasing = useSubtitleStore((s) => s.overrideCasing);
   const delay = useSubtitleStore((s) => s.delay);
 
+  console.log("SubtitleRenderer - srtData length:", srtData?.length, "language:", language, "videoTime:", videoTime);
+
   const parsedCaptions = useMemo(
-    () => (srtData ? parseSubtitles(srtData, language) : []),
+    () => {
+      const parsed = srtData ? parseSubtitles(srtData, language) : [];
+      console.log("Parsed captions count:", parsed.length);
+      return parsed;
+    },
     [srtData, language],
   );
 

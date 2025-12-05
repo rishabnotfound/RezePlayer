@@ -1,4 +1,5 @@
 import { MakeSlice } from "@/stores/player/slices/types";
+import { addCachedMetadata } from "@/backend/helpers/providerApi";
 
 export const playerStatus = {
   IDLE: "idle",
@@ -6,6 +7,7 @@ export const playerStatus = {
   PAUSED: "paused",
   SCRAPING: "scraping",
   SCRAPE_NOT_FOUND: "scrapeNotFound",
+  PLAYBACK_ERROR: "playbackError",
 } as const;
 
 export type PlayerStatus = (typeof playerStatus)[keyof typeof playerStatus];
@@ -58,6 +60,9 @@ export interface SourceSlice {
   setCaption(caption: CaptionListItem | null): void;
   setSourceId(id: string | null): void;
   setShouldStartFromBeginning(shouldStart: boolean): void;
+  redisplaySource(time: number): void;
+  switchQuality(quality: string): void;
+  enableAutomaticQuality(): void;
   reset(): void;
 }
 
@@ -70,7 +75,7 @@ export function metaToScrapeMedia(meta: PlayerMeta | null): any {
   };
 }
 
-export const createSourceSlice: MakeSlice<SourceSlice> = (set) => ({
+export const createSourceSlice: MakeSlice<SourceSlice> = (set, get) => ({
   status: playerStatus.IDLE,
   meta: null,
   source: null,
@@ -98,11 +103,20 @@ export const createSourceSlice: MakeSlice<SourceSlice> = (set) => ({
       if (status) state.status = status;
     });
   },
-  setSource(source, captions, startAt) {
+  setSource(source, captions, startAt = 0) {
     set((state) => {
       state.source = source;
       state.captionList = captions;
     });
+    const display = get().display;
+    if (display && source) {
+      display.load({
+        source,
+        startAt,
+        automaticQuality: false,
+        preferredQuality: null,
+      });
+    }
   },
   setCaption(caption) {
     set((state) => {
@@ -113,11 +127,34 @@ export const createSourceSlice: MakeSlice<SourceSlice> = (set) => ({
     set((state) => {
       state.sourceId = id;
     });
+    if (id) {
+      addCachedMetadata({
+        id,
+        name: id,
+        type: "source",
+        mediaTypes: ["movie", "show"]
+      });
+    }
   },
   setShouldStartFromBeginning(shouldStart) {
     set((state) => {
       state.interface.shouldStartFromBeginning = shouldStart;
     });
+  },
+  redisplaySource(time) {
+    // No-op for standalone player
+  },
+  switchQuality(quality) {
+    const display = get().display;
+    if (display) {
+      display.changeQuality(false, quality);
+    }
+  },
+  enableAutomaticQuality() {
+    const display = get().display;
+    if (display) {
+      display.changeQuality(true, null);
+    }
   },
   reset() {
     set((state) => {

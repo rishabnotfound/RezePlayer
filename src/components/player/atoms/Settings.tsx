@@ -23,6 +23,7 @@ import { PlaybackSettingsView } from "./settings/PlaybackSettingsView";
 import { QualityView } from "./settings/QualityView";
 import { SettingsMenu } from "./settings/SettingsMenu";
 import SourceCaptionsView from "./settings/SourceCaptionsView";
+import { StandaloneSourceView } from "./settings/StandaloneSourceView";
 
 function SettingsOverlay({ id }: { id: string }) {
   const [chosenSourceId, setChosenSourceId] = useState<string | null>(null);
@@ -120,12 +121,7 @@ function SettingsOverlay({ id }: { id: string }) {
         </OverlayPage>
         <OverlayPage id={id} path="/source" width={343} height={431}>
           <Menu.CardWithScrollable>
-            <SourceSelectionView id={id} onChoose={setChosenSourceId} />
-          </Menu.CardWithScrollable>
-        </OverlayPage>
-        <OverlayPage id={id} path="/source/embeds" width={343} height={431}>
-          <Menu.CardWithScrollable>
-            <EmbedSelectionView id={id} sourceId={chosenSourceId} />
+            <StandaloneSourceView id={id} />
           </Menu.CardWithScrollable>
         </OverlayPage>
         <OverlayPage id={id} path="/playback" width={343} height={215}>

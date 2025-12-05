@@ -37,7 +37,9 @@ export function useCaptions() {
 
   const selectCaptionById = useCallback(
     async (captionId: string) => {
+      console.log("selectCaptionById called with:", captionId);
       const caption = captions.find((v) => v.id === captionId);
+      console.log("Found caption:", caption);
       if (!caption) return;
 
       const captionToSet: Caption = {
@@ -48,7 +50,10 @@ export function useCaptions() {
       };
 
       if (!caption.hls) {
+        console.log("Downloading caption from URL:", caption.url);
         const srtData = await downloadCaption(caption);
+        console.log("Downloaded SRT data length:", srtData.length);
+        console.log("First 200 chars of SRT:", srtData.substring(0, 200));
         captionToSet.srtData = srtData;
       } else {
         // request a language change to hls, so it can load the subtitles
@@ -78,10 +83,12 @@ export function useCaptions() {
         captionToSet.srtData = srtData;
       }
 
+      console.log("Setting caption with data:", captionToSet);
       setIsOpenSubtitles(!!caption.opensubtitles);
       setCaption(captionToSet);
       resetSubtitleSpecificSettings();
       setLanguage(caption.language);
+      console.log("Caption set complete");
     },
     [
       setIsOpenSubtitles,

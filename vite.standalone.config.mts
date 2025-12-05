@@ -50,30 +50,10 @@ export default defineConfig({
   ],
 
   build: {
-    outDir: 'dist',
+    outDir: 'dist-standalone',
     sourcemap: true,
     rollupOptions: {
       input: path.resolve(__dirname, 'index.html'),
-      output: {
-        manualChunks(id: string) {
-          if (id.includes("node_modules")) {
-            if (id.includes("react") || id.includes("react-dom")) {
-              return "react-vendor";
-            }
-            if (id.includes("hls.js")) {
-              return "hls";
-            }
-            const isCaptioningPackage = captioningPackages.some(packageName => id.includes(packageName));
-            if (isCaptioningPackage) {
-              return "caption-parsing";
-            }
-            return "vendor";
-          }
-          if (id.includes("Icon.tsx")) {
-            return "Icons";
-          }
-        }
-      }
     }
   },
   css: {

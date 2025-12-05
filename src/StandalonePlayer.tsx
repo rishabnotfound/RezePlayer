@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Player } from "@/components/player";
 import { useShouldShowControls } from "@/components/player/hooks/useShouldShowControls";
 import { usePlayer } from "@/components/player/hooks/usePlayer";
@@ -7,81 +7,88 @@ import { usePlayerStore } from "@/stores/player/store";
 import { SettingsRouter } from "@/components/player/atoms/Settings";
 import { ThumbnailScraper } from "@/components/player/internals/ThumbnailScraper";
 import { usePreferencesStore } from "@/stores/preferences";
-
-declare global {
-  interface Window {
-    __PLAYER_CONFIG__?: {
-      stream: {
-        url: string;
-        name: string;
-        type: 'hls' | 'mp4';
-        captions?: Array<{
-          id: string;
-          language: string;
-          label: string;
-          url: string;
-          type: string;
-        }>;
-      };
-      meta: {
-        title: string;
-        description?: string;
-      };
-      settings: {
-        defaultVolume: number;
-        autoPlay: boolean;
-        startTime: number;
-      };
-    };
-  }
-}
+import { getConfigForServer, servers } from "@/server";
+import { addCachedMetadata } from "@/backend/helpers/providerApi";
+import { findWorkingServer } from "@/utils/serverManager";
 
 export function StandalonePlayer() {
   const { showTargets, showTouchTargets } = useShouldShowControls();
   const setEnableThumbnails = usePreferencesStore((s) => s.setEnableThumbnails);
+  const [currentServerIndex, setCurrentServerIndex] = useState<number>(-1);
 
   useEffect(() => {
     setEnableThumbnails(true);
   }, [setEnableThumbnails]);
+
   const status = usePlayerStore((s) => s.status);
   const isLoading = usePlayerStore((s) => s.mediaPlaying.isLoading);
-  const { playMedia, setMeta } = usePlayer();
+  const { playMedia, setMeta, reset } = usePlayer();
 
-  useEffect(() => {
-    const config = window.__PLAYER_CONFIG__;
-    if (!config) {
-      console.error('Player configuration not found. Make sure config.js is loaded.');
-      return;
-    }
+  const loadServer = useCallback(async (serverIndex: number) => {
+    try {
+      const config = getConfigForServer(serverIndex);
 
-    setMeta({
-      type: 'movie',
-      title: config.meta.title,
-      tmdbId: 'standalone-video',
-    });
+      setMeta({
+        type: 'movie',
+        title: config.meta.title,
+        tmdbId: 'standalone-video',
+      });
 
-    const source = {
-      type: config.stream.type,
-      url: config.stream.url,
-    };
+      const source = {
+        type: config.stream.type,
+        url: config.stream.url,
+      };
 
-    const captions = config.stream.captions?.map(cap => ({
-      id: cap.id,
-      language: cap.language,
-      hasCorsRestrictions: false,
-      url: cap.url,
-      type: cap.type as 'srt' | 'vtt',
-    })) || [];
+      const captions = config.stream.captions?.map(cap => ({
+        id: cap.id,
+        language: cap.language,
+        hasCorsRestrictions: false,
+        url: cap.url,
+        type: cap.type,
+      })) || [];
 
-    setTimeout(() => {
       playMedia(
         source as any,
         captions,
         config.stream.name,
         config.settings.startTime
       );
-    }, 100);
-  }, []);
+
+      setCurrentServerIndex(serverIndex);
+    } catch (error) {
+      console.error(`Failed to load server ${serverIndex}:`, error);
+      throw error;
+    }
+  }, [playMedia, setMeta]);
+
+  useEffect(() => {
+    // Register all servers in the metadata cache so they appear in Sources menu
+    servers.forEach((server) => {
+      addCachedMetadata({
+        id: server.name,
+        name: server.name,
+        type: "source",
+        mediaTypes: ["movie", "show"]
+      });
+    });
+
+    // Load the first server by default
+    loadServer(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
+  // Listen for source changes from the Sources menu
+  const sourceId = usePlayerStore((s) => s.sourceId);
+  useEffect(() => {
+    if (!sourceId || currentServerIndex === -1) return;
+
+    const serverIndex = servers.findIndex(s => s.name === sourceId);
+    if (serverIndex !== -1 && serverIndex !== currentServerIndex) {
+      console.log(`Switching to server: ${sourceId}`);
+      loadServer(serverIndex);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceId]); // Only watch sourceId changes
 
   return (
     <Player.Container showingControls={showTargets}>

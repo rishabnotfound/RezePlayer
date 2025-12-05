@@ -18,11 +18,15 @@ import { canPlayHlsNatively } from "@/utils/detectFeatures";
 
 const alwaysVisibleQualities: Record<SourceQuality, boolean> = {
   unknown: false,
-  "360": true,
-  "480": true,
-  "720": true,
-  "1080": true,
-  "4k": true,
+  "144": false,
+  "240": false,
+  "360": false,
+  "480": false,
+  "540": false,
+  "720": false,
+  "1080": false,
+  "1440": false,
+  "4k": false,
 };
 
 function useIsIosHls() {
@@ -42,6 +46,7 @@ export function QualityView({ id }: { id: string }) {
   const isIosHls = useIsIosHls();
   const availableQualities = usePlayerStore((s) => s.qualities);
   const currentQuality = usePlayerStore((s) => s.currentQuality);
+  const sourceType = usePlayerStore((s) => s.source?.type);
   const switchQuality = usePlayerStore((s) => s.switchQuality);
   const enableAutomaticQuality = usePlayerStore(
     (s) => s.enableAutomaticQuality,
@@ -72,6 +77,9 @@ export function QualityView({ id }: { id: string }) {
     return false;
   });
 
+  // For MP4, hide quality selection since there's only one quality
+  const isMp4 = sourceType === "mp4";
+
   return (
     <>
       <Menu.BackLink onClick={() => router.navigate("/")}>
@@ -83,19 +91,23 @@ export function QualityView({ id }: { id: string }) {
             key={v}
             selected={v === currentQuality}
             onClick={
-              availableQualities.includes(v) ? () => change(v) : undefined
+              availableQualities.includes(v) && !isMp4 ? () => change(v) : undefined
             }
-            disabled={!availableQualities.includes(v)}
+            disabled={!availableQualities.includes(v) || isMp4}
           >
-            {qualityToString(v)}
+            {qualityToString(v, sourceType)}
           </SelectableLink>
         ))}
-        <Menu.Divider />
-        <Menu.Link
-          rightSide={<Toggle onClick={changeAutomatic} enabled={autoQuality} />}
-        >
-          {t("player.menus.quality.automaticLabel")}
-        </Menu.Link>
+        {!isMp4 && (
+          <>
+            <Menu.Divider />
+            <Menu.Link
+              rightSide={<Toggle onClick={changeAutomatic} enabled={autoQuality} />}
+            >
+              {t("player.menus.quality.automaticLabel")}
+            </Menu.Link>
+          </>
+        )}
         <Menu.SmallText>
           <Trans
             i18nKey={

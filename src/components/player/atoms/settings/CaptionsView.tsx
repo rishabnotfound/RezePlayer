@@ -1,12 +1,9 @@
-import classNames from "classnames";
-import { type DragEvent, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { convert } from "subsrt-ts";
 
 import { subtitleTypeList } from "@/backend/helpers/subs";
-import { FileDropHandler } from "@/components/DropFile";
 import { FlagIcon } from "@/components/FlagIcon";
-import { Icon, Icons } from "@/components/Icon";
 import { useCaptions } from "@/components/player/hooks/useCaptions";
 import { Menu } from "@/components/player/internals/ContextMenu";
 import { SelectableLink } from "@/components/player/internals/ContextMenu/Links";
@@ -87,66 +84,18 @@ export function CaptionsView({
   backLink,
 }: {
   id: string;
-  backLink?: true;
+  backLink?: boolean;
 }) {
   const { t } = useTranslation();
   const router = useOverlayRouter(id);
   const selectedCaptionId = usePlayerStore((s) => s.caption.selected?.id);
-  const { disable } = useCaptions();
-  const [dragging, setDragging] = useState(false);
-  const setCaption = usePlayerStore((s) => s.setCaption);
-  const selectedCaptionLanguage = usePlayerStore(
-    (s) => s.caption.selected?.language,
-  );
-
-  function onDrop(event: DragEvent<HTMLDivElement>) {
-    const files = event.dataTransfer.files;
-    const firstFile = files[0];
-    if (!files || !firstFile) return;
-
-    const fileExtension = `.${firstFile.name.split(".").pop()}`;
-    if (!fileExtension || !subtitleTypeList.includes(fileExtension)) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.addEventListener("load", (e) => {
-      if (!e.target || typeof e.target.result !== "string") return;
-
-      const converted = convert(e.target.result, "srt");
-
-      setCaption({
-        language: "custom",
-        srtData: converted,
-        id: "custom-caption",
-      });
-    });
-
-    reader.readAsText(firstFile);
-  }
-
-  const selectedLanguagePretty = selectedCaptionLanguage
-    ? (getPrettyLanguageNameFromLocale(selectedCaptionLanguage) ??
-      t("player.menus.subtitles.unknownLanguage"))
-    : undefined;
+  const { disable, selectCaptionById } = useCaptions();
+  const captionList = usePlayerStore((s) => s.captionList);
+  const [currentlyDownloading, setCurrentlyDownloading] = useState<string | null>(null);
 
   return (
     <>
       <div>
-        <div
-          className={classNames(
-            "absolute inset-0 flex items-center justify-center text-white z-10 pointer-events-none transition-opacity duration-300",
-            dragging ? "opacity-100" : "opacity-0",
-          )}
-        >
-          <div className="flex flex-col items-center">
-            <Icon className="text-5xl mb-4" icon={Icons.UPLOAD} />
-            <span className="text-xl weight font-medium">
-              {t("player.menus.subtitles.dropSubtitleFile")}
-            </span>
-          </div>
-        </div>
-
         {backLink ? (
           <Menu.BackLink
             onClick={() => router.navigate("/")}
@@ -178,23 +127,37 @@ export function CaptionsView({
           </Menu.Title>
         )}
       </div>
-      <FileDropHandler
-        className={`transition duration-300 ${dragging ? "opacity-20" : ""}`}
-        onDraggingChange={(isDragging) => {
-          setDragging(isDragging);
-        }}
-        onDrop={(event) => onDrop(event)}
-      >
-        <Menu.ScrollToActiveSection className="!pt-1 mt-2 pb-3">
+      <Menu.ScrollToActiveSection className="!pt-1 mt-2 pb-3">
           <CaptionOption
             onClick={() => disable()}
             selected={!selectedCaptionId}
           >
             {t("player.menus.subtitles.offChoice")}
           </CaptionOption>
-          <CustomCaptionOption />
-        </Menu.ScrollToActiveSection>
-      </FileDropHandler>
+
+          {/* Show available captions directly */}
+          {captionList.map((caption) => (
+            <CaptionOption
+              key={caption.id}
+              countryCode={caption.language}
+              selected={caption.id === selectedCaptionId}
+              loading={caption.id === currentlyDownloading}
+              onClick={async () => {
+                console.log("Selecting caption:", caption);
+                setCurrentlyDownloading(caption.id);
+                try {
+                  await selectCaptionById(caption.id);
+                  console.log("Caption selected successfully");
+                } catch (error) {
+                  console.error("Failed to select caption:", error);
+                }
+                setCurrentlyDownloading(null);
+              }}
+            >
+              {caption.language === "ja" ? "Japanese" : caption.language === "zh" ? "Chinese" : caption.language.toUpperCase()}
+            </CaptionOption>
+          ))}
+      </Menu.ScrollToActiveSection>
     </>
   );
 }

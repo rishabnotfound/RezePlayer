@@ -1,0 +1,24 @@
+const levelConversionMap: Record<number, SourceQuality> = {
+  144: "144",
+  180: "144",
+  240: "240",
+  270: "240",
+  360: "360",
+  406: "360",
+  480: "480",
+  540: "540",
+  720: "720",
+  1080: "1080",
+  1440: "1440",
+  2160: "4k",
+};
+
+function hlsLevelToQuality(level?: Level): SourceQuality | null {
+  const height = level?.height ?? 0;
+  if (levelConversionMap[height]) return levelConversionMap[height];
+  const heights = Object.keys(levelConversionMap).map(Number).sort((a, b) => a - b);
+  for (const h of heights) {
+    if (height <= h) return levelConversionMap[h];
+  }
+  return levelConversionMap[heights[heights.length - 1]] ?? null;
+}

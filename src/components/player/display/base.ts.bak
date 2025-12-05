@@ -31,28 +31,14 @@ import {
 import { makeEmitter } from "@/utils/events";
 
 const levelConversionMap: Record<number, SourceQuality> = {
-  144: "144",
-  180: "144",
-  240: "240",
-  270: "240",
   360: "360",
-  406: "360",
-  480: "480",
-  540: "540",
-  720: "720",
   1080: "1080",
-  1440: "1440",
-  2160: "4k",
+  720: "720",
+  480: "480",
 };
 
 function hlsLevelToQuality(level?: Level): SourceQuality | null {
-  const height = level?.height ?? 0;
-  if (levelConversionMap[height]) return levelConversionMap[height];
-  const heights = Object.keys(levelConversionMap).map(Number).sort((a, b) => a - b);
-  for (const h of heights) {
-    if (height <= h) return levelConversionMap[h];
-  }
-  return levelConversionMap[heights[heights.length - 1]] ?? null;
+  return levelConversionMap[level?.height ?? 0] ?? null;
 }
 
 function qualityToHlsLevel(quality: SourceQuality): number | null {
@@ -127,32 +113,17 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
     }
 
     if (!hls) return;
-
     if (!automaticQuality) {
       const qualities = hlsLevelsToQualities(hls.levels);
       const availableQuality = getPreferredQuality(qualities, {
         lastChosenQuality: preferenceQuality,
         automaticQuality,
       });
-
       if (availableQuality) {
-        const targetHeight = qualityToHlsLevel(availableQuality);
-
-        // Find the closest matching level instead of exact match
-        let levelIndex = hls.levels.findIndex(
-          (v) => v.height === targetHeight,
+        const levelIndex = hls.levels.findIndex(
+          (v) => v.height === qualityToHlsLevel(availableQuality),
         );
-
-        // If exact match not found, find the level that corresponds to this quality
-        if (levelIndex === -1) {
-          levelIndex = hls.levels.findIndex((level) => {
-            const levelQuality = hlsLevelToQuality(level);
-            return levelQuality === availableQuality;
-          });
-        }
-
         if (levelIndex !== -1) {
-          // Set the level manually (this disables auto level selection)
           hls.currentLevel = levelIndex;
           hls.loadLevel = levelIndex;
         }
@@ -161,7 +132,7 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
       hls.currentLevel = -1;
       hls.loadLevel = -1;
     }
-    const quality = hlsLevelToQuality(hls.levels[hls.currentLevel >= 0 ? hls.currentLevel : hls.loadLevel]);
+    const quality = hlsLevelToQuality(hls.levels[hls.currentLevel]);
     emit("changedquality", quality);
   }
 
@@ -304,11 +275,7 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
       emit("time", videoElement?.currentTime ?? 0),
     );
     videoElement.addEventListener("loadedmetadata", () => {
-      if (source?.type === "mp4") {
-        // MP4 files have a single quality
-        emit("qualities", ["unknown"]);
-        emit("changedquality", "unknown");
-      } else if (
+      if (
         source?.type === "hls" &&
         videoElement &&
         canPlayHlsNatively(videoElement)
