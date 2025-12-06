@@ -26,23 +26,13 @@
       title: 'Reze Player',
       servers: [
         {
-          name: 'Comet',
-          url: 'https://artplayer.org/assets/sample/video.mp4',
-          type: 'mp4'
-        },
-        {
-          name: 'Star',
-          url: 'https://content.jwplatform.com/manifests/yp34SRmf.m3u8',
+          name: 'HLS Sample',
+          url: '/reze/hls/master.m3u8',
           type: 'hls'
         },
         {
-          name: 'Galaxy',
-          url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-          type: 'hls'
-        },
-        {
-          name: 'Nova',
-          url: 'https://files.vidstack.io/sprite-fight/720p.mp4',
+          name: 'MP4 Sample',
+          url: '/reze/mp4/trailer.mp4',
           type: 'mp4'
         }
       ],
@@ -50,13 +40,13 @@
         {
           name: 'Japanese',
           language: 'ja',
-          src: 'https://artplayer.org/assets/sample/subtitle.jp.srt',
+          src: '/reze/subs/ja.vtt',
           default: true
         },
         {
-          name: 'Chinese',
-          language: 'zh',
-          src: 'https://artplayer.org/assets/sample/subtitle.cn.srt'
+          name: 'English',
+          language: 'eng',
+          src: '/reze/subs/eng.vtt',
         }
       ],
       autoPlay: true,
