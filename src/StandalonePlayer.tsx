@@ -43,10 +43,14 @@ export function StandalonePlayer() {
 
     const captions = (config.subtitles || []).map((cap: any) => ({
       id: cap.id,
-      language: cap.language,
+      name: cap.name,
+      language: cap.language || 'unknown',
+      flagsapi: cap.flagsapi,
       hasCorsRestrictions: false,
       url: cap.url,
       type: cap.type,
+      needsProxy: false,
+      hls: false,
     }));
 
     playMedia(
@@ -83,25 +87,29 @@ export function StandalonePlayer() {
         setTimeout(async () => {
           const captionList = usePlayerStore.getState().captionList;
           console.log('Caption list:', captionList);
-          console.log('Looking for language:', defaultSubtitle.language);
+          console.log('Looking for subtitle ID:', defaultSubtitle.id);
 
-          const caption = captionList.find((c: any) => c.language === defaultSubtitle.language);
+          const caption = captionList.find((c: any) => c.id === defaultSubtitle.id);
           console.log('Found caption:', caption);
 
           if (caption) {
-            console.log('Auto-selecting default subtitle:', caption.language);
+            console.log('Auto-selecting default subtitle:', caption.name || caption.language);
             try {
               const srtData = await downloadCaption(caption);
-              console.log('Downloaded SRT data, length:', srtData.length);
+              console.log('Downloaded subtitle data, length:', srtData.length);
 
               usePlayerStore.getState().setCaption({
                 id: caption.id,
+                name: caption.name,
                 language: caption.language,
+                flagsapi: caption.flagsapi,
                 url: caption.url,
                 srtData,
               });
 
-              useSubtitleStore.getState().setLanguage(caption.language);
+              if (caption.language) {
+                useSubtitleStore.getState().setLanguage(caption.language);
+              }
               console.log('Default subtitle loaded successfully');
             } catch (error) {
               console.error('Error loading default subtitle:', error);

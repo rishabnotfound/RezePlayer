@@ -47,8 +47,10 @@ export interface DisplayMeta {
 
 export interface DisplayCaption {
   id: string;
+  name?: string;
   srtData: string;
   language: string;
+  flagsapi?: string;
   url?: string;
 }
 

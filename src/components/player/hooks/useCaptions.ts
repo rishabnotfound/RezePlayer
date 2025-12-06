@@ -44,7 +44,9 @@ export function useCaptions() {
 
       const captionToSet: Caption = {
         id: caption.id,
+        name: caption.name,
         language: caption.language,
+        flagsapi: caption.flagsapi,
         url: caption.url,
         srtData: "",
       };

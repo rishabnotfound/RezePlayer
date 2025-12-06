@@ -20,9 +20,8 @@ export function SettingsMenu({ id }: { id: string }) {
   const router = useOverlayRouter(id);
   const currentQuality = usePlayerStore((s) => s.currentQuality);
   const currentAudioTrack = usePlayerStore((s) => s.currentAudioTrack);
-  const selectedCaptionLanguage = usePlayerStore(
-    (s) => s.caption.selected?.language,
-  );
+  const selectedCaption = usePlayerStore((s) => s.caption.selected);
+  const selectedCaptionLanguage = selectedCaption?.language;
   const subtitlesEnabled = useSubtitleStore((s) => s.enabled);
   const currentSourceId = usePlayerStore((s) => s.sourceId);
   const sourceName = useMemo(() => {
@@ -34,8 +33,9 @@ export function SettingsMenu({ id }: { id: string }) {
   }, [currentSourceId]);
   const { toggleLastUsed } = useCaptions();
 
-  const selectedLanguagePretty = selectedCaptionLanguage
-    ? (getPrettyLanguageNameFromLocale(selectedCaptionLanguage) ??
+  const selectedLanguagePretty = selectedCaption
+    ? (selectedCaption.name ||
+      getPrettyLanguageNameFromLocale(selectedCaptionLanguage) ||
       t("player.menus.subtitles.unknownLanguage"))
     : undefined;
 

@@ -3,17 +3,15 @@ import { useTranslation } from "react-i18next";
 import { convert } from "subsrt-ts";
 
 import { subtitleTypeList } from "@/backend/helpers/subs";
-import { FlagIcon } from "@/components/FlagIcon";
 import { useCaptions } from "@/components/player/hooks/useCaptions";
 import { Menu } from "@/components/player/internals/ContextMenu";
 import { SelectableLink } from "@/components/player/internals/ContextMenu/Links";
 import { useOverlayRouter } from "@/hooks/useOverlayRouter";
 import { usePlayerStore } from "@/stores/player/store";
 import { useSubtitleStore } from "@/stores/subtitles";
-import { getPrettyLanguageNameFromLocale } from "@/utils/language";
 
 export function CaptionOption(props: {
-  countryCode?: string;
+  flagUrl?: string;
   children: React.ReactNode;
   selected?: boolean;
   loading?: boolean;
@@ -31,9 +29,15 @@ export function CaptionOption(props: {
         data-active-link={props.selected ? true : undefined}
         className="flex items-center"
       >
-        <span data-code={props.countryCode} className="mr-3 inline-flex">
-          <FlagIcon langCode={props.countryCode} />
-        </span>
+        {props.flagUrl && (
+          <span className="mr-3 inline-flex">
+            <img
+              src={props.flagUrl}
+              alt="flag"
+              className="w-8 h-6 object-cover rounded"
+            />
+          </span>
+        )}
         <span>{props.children}</span>
       </span>
     </SelectableLink>
@@ -139,7 +143,7 @@ export function CaptionsView({
           {captionList.map((caption) => (
             <CaptionOption
               key={caption.id}
-              countryCode={caption.language}
+              flagUrl={caption.flagsapi}
               selected={caption.id === selectedCaptionId}
               loading={caption.id === currentlyDownloading}
               onClick={async () => {
@@ -154,7 +158,7 @@ export function CaptionsView({
                 setCurrentlyDownloading(null);
               }}
             >
-              {caption.language === "ja" ? "Japanese" : caption.language === "zh" ? "Chinese" : caption.language.toUpperCase()}
+              {caption.name || caption.language}
             </CaptionOption>
           ))}
       </Menu.ScrollToActiveSection>

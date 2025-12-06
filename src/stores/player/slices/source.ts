@@ -31,7 +31,9 @@ export interface PlayerMeta {
 
 export interface CaptionListItem {
   id: string;
+  name?: string;
   language: string;
+  flagsapi?: string;
   hasCorsRestrictions: boolean;
   url: string;
   type: "srt" | "vtt";

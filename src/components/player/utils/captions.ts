@@ -5,7 +5,51 @@ export function convertProviderCaption(captions: any[]): CaptionListItem[] {
 }
 
 export function convertSubtitlesToSrt(text: string): string {
-  return text;
+  // If already SRT format, return as is
+  if (!text.trim().startsWith('WEBVTT')) {
+    return text;
+  }
+
+  // Convert VTT to SRT
+  const lines = text.split('\n');
+  const srtLines: string[] = [];
+  let index = 1;
+  let i = 0;
+
+  // Skip WEBVTT header and metadata
+  while (i < lines.length && !lines[i].includes('-->')) {
+    i++;
+  }
+
+  // Process subtitle blocks
+  while (i < lines.length) {
+    const line = lines[i].trim();
+
+    // Found a timestamp line
+    if (line.includes('-->')) {
+      // Convert VTT timestamp (00:00:00.000) to SRT timestamp (00:00:00,000)
+      const srtTimestamp = line.replace(/\./g, ',');
+
+      srtLines.push(String(index));
+      srtLines.push(srtTimestamp);
+
+      // Collect subtitle text until empty line
+      i++;
+      const textLines: string[] = [];
+      while (i < lines.length && lines[i].trim() !== '') {
+        textLines.push(lines[i]);
+        i++;
+      }
+
+      srtLines.push(textLines.join('\n'));
+      srtLines.push(''); // Empty line between subtitles
+
+      index++;
+    }
+    i++;
+  }
+
+  return srtLines.join('\n');
 }
 
 export function parseVttSubtitles(text: string): any[] {

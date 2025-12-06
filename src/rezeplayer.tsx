@@ -25,7 +25,8 @@ export interface RezePlayerServer {
 export interface RezePlayerSubtitle {
   name: string;
   src: string;
-  language: string;
+  language?: string;
+  flagsapi?: string;
   default?: boolean;
 }
 
@@ -81,9 +82,11 @@ class RezePlayer {
       },
       subtitles: (this.options.subtitles || []).map((sub, index) => ({
         id: `subtitle-${index}`,
-        language: sub.language,
+        name: sub.name,
+        language: sub.language || 'unknown',
+        flagsapi: sub.flagsapi,
         url: sub.src,
-        type: 'srt' as const,
+        type: (sub.src.toLowerCase().endsWith('.vtt') ? 'vtt' : 'srt') as 'srt' | 'vtt',
         default: sub.default || false,
       })),
       settings: {

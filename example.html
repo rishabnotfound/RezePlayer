@@ -6,10 +6,10 @@
   <meta name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="RezePlayer Test" />
-  <title>RezePlayer Examples</title>
+  <title>RezePlayer Testing</title>
 
   <!-- Include RezePlayer CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.4/dist/assets/style.css">
+  <link rel="stylesheet" href="./dist/assets/style.css">
 
 </head>
 <body>
@@ -17,7 +17,7 @@
   <div id="root"></div>
 
   <!-- Include RezePlayer JS -->
-  <script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.4/dist/rezeplayer.iife.js"></script>
+  <script src="./dist/rezeplayer.iife.js"></script>
 
   <script>
     // Initialize RezePlayer with ALL servers from server.ts
@@ -39,14 +39,39 @@
       subtitles: [
         {
           name: 'Japanese',
-          language: 'ja',
+          flagsapi: 'https://flagsapi.com/JP/flat/64.png',
           src: 'https://rezeplayer.vercel.app/reze/subs/ja.vtt',
           default: true
         },
         {
           name: 'English',
-          language: 'eng',
+          flagsapi: 'https://flagsapi.com/US/flat/64.png',
           src: 'https://rezeplayer.vercel.app/reze/subs/eng.vtt',
+        },
+        {
+          name: 'French',
+          flagsapi: 'https://flagsapi.com/FR/flat/64.png',
+          src: 'https://rezeplayer.vercel.app/reze/subs/french.vtt',
+        },
+        {
+          name: 'Russian',
+          flagsapi: 'https://flagsapi.com/RU/flat/64.png',
+          src: 'https://rezeplayer.vercel.app/reze/subs/russian.vtt',
+        },
+        {
+          name: 'Korean',
+          flagsapi: 'https://flagsapi.com/KP/flat/64.png',
+          src: 'https://rezeplayer.vercel.app/reze/subs/koreon.vtt',
+        },
+        {
+          name: 'Chinese',
+          flagsapi: 'https://flagsapi.com/CN/flat/64.png',
+          src: 'https://rezeplayer.vercel.app/reze/subs/chinese.vtt',
+        },
+        {
+          name: 'Arabic',
+          flagsapi: 'https://flagsapi.com/SA/flat/64.png',
+          src: 'https://rezeplayer.vercel.app/reze/subs/arabic.vtt',
         }
       ],
       autoPlay: true,
