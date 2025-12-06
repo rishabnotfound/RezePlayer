@@ -1,26 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr" data-full>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="RezePlayer Test" />
   <title>RezePlayer Examples</title>
 
   <!-- Include RezePlayer CSS -->
   <link rel="stylesheet" href="./dist/assets/style.css">
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-    #player {
-      width: 100vw;
-      height: 100vh;
-    }
-  </style>
 </head>
 <body>
-  <div id="player"></div>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
 
   <!-- Include RezePlayer JS -->
   <script src="./dist/rezeplayer.iife.js"></script>
@@ -28,7 +22,7 @@
   <script>
     // Initialize RezePlayer with ALL servers from server.ts
     // User can switch between servers in the Sources menu
-    RezePlayer.make('#player', {
+    RezePlayer.make('#root', {
       title: 'Reze Player',
       servers: [
         {

@@ -1,220 +1,217 @@
 # RezePlayer
 
-Professional HLS/MP4 video player with subtitle support. Easy to use, just like OPlayer!
+A standalone HLS/MP4 video player with subtitle support, watch party, and Chromecast. Built with React.
 
 ## Features
 
-- 🎥 **HLS & MP4 Support** - Automatically detects stream type
-- 📝 **Subtitle Support** - SRT and VTT formats
+- 🎥 **Multiple Sources** - Support for HLS and MP4 with server switching
+- 📝 **Subtitles** - Multi-language subtitle support (SRT/VTT)
 - 🎨 **Beautiful UI** - Modern, responsive player interface
-- ⚡ **Fast & Lightweight** - Optimized performance
-- 🌐 **Multiple Quality Levels** - Automatic quality switching for HLS
+- 👥 **Watch Party** - Synchronized viewing with friends
+- 📺 **Chromecast** - Cast to any Chromecast device
+- ⚡ **Fast & Lightweight** - Optimized for performance
 - 📱 **Mobile Friendly** - Touch controls and responsive design
 
-## Installation
+## Quick Start
 
-```bash
-npm install rezeplayer
-```
-
-Or use via CDN:
+### 1. Include CSS and JS
 
 ```html
 <!-- Include CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@latest/dist/assets/style.css">
+<link rel="stylesheet" href="./dist/assets/style.css">
 
 <!-- Include JS -->
-<script src="https://cdn.jsdelivr.net/npm/rezeplayer@latest/dist/rezeplayer.iife.js"></script>
+<script src="./dist/rezeplayer.iife.js"></script>
 ```
 
-## Usage
+### 2. Add Container
 
-### Basic Example
+```html
+<div id="player"></div>
+```
+
+### 3. Initialize Player
+
+```javascript
+RezePlayer.make('#player', {
+  title: 'My Video',
+  servers: [
+    {
+      name: 'Server 1',
+      url: 'https://example.com/video.m3u8',
+      type: 'hls'
+    },
+    {
+      name: 'Server 2',
+      url: 'https://example.com/video.mp4',
+      type: 'mp4'
+    }
+  ],
+  subtitles: [
+    {
+      name: 'English',
+      language: 'en',
+      src: 'https://example.com/subtitles-en.srt',
+      default: true
+    }
+  ],
+  autoPlay: true,
+  volume: 1,
+  startTime: 0,
+  enableWatchParty: true
+});
+```
+
+## Full Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-full>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <title>RezePlayer Example</title>
 
   <!-- Include RezePlayer CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@latest/dist/assets/style.css">
+  <link rel="stylesheet" href="./dist/assets/style.css">
 </head>
 <body>
-  <div id="player"></div>
+  <div id="root"></div>
 
   <!-- Include RezePlayer JS -->
-  <script src="https://cdn.jsdelivr.net/npm/rezeplayer@latest/dist/rezeplayer.iife.js"></script>
+  <script src="./dist/rezeplayer.iife.js"></script>
 
   <script>
-    // Initialize RezePlayer with multiple servers
-    RezePlayer.make('#player', {
-      title: 'My Video',
+    RezePlayer.make('#root', {
+      title: 'Reze Player',
       servers: [
         {
-          name: 'Server 1',
-          url: 'https://content.jwplatform.com/manifests/yp34SRmf.m3u8',
-          type: 'hls'
+          name: 'Comet',
+          url: 'https://artplayer.org/assets/sample/video.mp4',
+          type: 'mp4'
         },
         {
-          name: 'Server 2',
-          url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+          name: 'Star',
+          url: 'https://content.jwplatform.com/manifests/yp34SRmf.m3u8',
           type: 'hls'
         }
       ],
       subtitles: [
         {
-          name: 'English',
-          language: 'en',
-          src: 'https://example.com/subtitles-en.srt',
+          name: 'Japanese',
+          language: 'ja',
+          src: 'https://artplayer.org/assets/sample/subtitle.jp.srt',
           default: true
         },
         {
-          name: 'Spanish',
-          language: 'es',
-          src: 'https://example.com/subtitles-es.srt'
+          name: 'Chinese',
+          language: 'zh',
+          src: 'https://artplayer.org/assets/sample/subtitle.cn.srt'
         }
       ],
       autoPlay: true,
       volume: 1,
       startTime: 0,
-      enableWatchParty: false  // Optional: disable watch party
+      enableWatchParty: true
     });
   </script>
 </body>
 </html>
 ```
 
-### As NPM Module
+## API Reference
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `servers` | `Array` | **required** | List of video sources |
+| `title` | `String` | `'Reze Player'` | Video title |
+| `subtitles` | `Array` | `[]` | Subtitle tracks |
+| `autoPlay` | `Boolean` | `true` | Auto-play on load |
+| `volume` | `Number` | `1` | Initial volume (0-1) |
+| `startTime` | `Number` | `0` | Start position in seconds |
+| `enableWatchParty` | `Boolean` | `true` | Enable watch party feature |
+
+### Server Object
+
+```typescript
+{
+  name: string;        // Display name (e.g., "Server 1")
+  url: string;         // Video URL
+  type?: 'hls' | 'mp4' // Stream type (auto-detected if not specified)
+}
+```
+
+### Subtitle Object
+
+```typescript
+{
+  name: string;        // Display name (e.g., "English")
+  language: string;    // Language code (e.g., "en", "ja", "zh")
+  src: string;         // Subtitle file URL (SRT or VTT)
+  default?: boolean    // Set as default subtitle
+}
+```
+
+### Player Methods
+
+```javascript
+const player = RezePlayer.make('#player', options);
+
+// Playback control
+player.play();           // Play video
+player.pause();          // Pause video
+
+// Seek
+player.seek(120);        // Seek to 2 minutes
+
+// Volume
+player.setVolume(0.5);   // Set 50% volume
+
+// Cleanup
+player.destroy();        // Remove player
+```
+
+## Full Page Mode
+
+For a full-page player, add `data-full` attribute to your HTML tag:
+
+```html
+<html lang="en" data-full>
+```
+
+This applies full-page styling (no scrolling, full viewport height).
+
+## Embedded Mode
+
+For embedded use on existing pages, just use a regular container:
+
+```html
+<div id="player" style="width: 100%; height: 500px;"></div>
+<script>
+  RezePlayer.make('#player', { /* options */ });
+</script>
+```
+
+The player uses scoped CSS to avoid conflicts with your page styles.
+
+## NPM Usage
+
+```bash
+npm install rezeplayer
+```
 
 ```javascript
 import { make } from 'rezeplayer';
 import 'rezeplayer/dist/assets/style.css';
 
 const player = make('#player', {
-  source: {
-    title: 'My Video',
-    src: 'https://content.jwplatform.com/manifests/yp34SRmf.m3u8'
-  },
-  autoPlay: true
-});
-
-// Control the player
-player.play();
-player.pause();
-player.setVolume(0.5);
-player.seek(30); // Jump to 30 seconds
-```
-
-## API Reference
-
-### RezePlayer.make(selector, options)
-
-Creates a new player instance.
-
-**Parameters:**
-
-- `selector` (string | HTMLElement) - CSS selector or DOM element where player will be mounted
-- `options` (RezePlayerOptions) - Player configuration
-
-**Returns:** `RezePlayerInstance` - Player instance with control methods
-
-### Options
-
-```typescript
-interface RezePlayerOptions {
-  servers: Array<{
-    name: string;             // Server name
-    url: string;              // Video URL
-    type?: 'hls' | 'mp4';    // Stream type (auto-detected if not specified)
-  }>;
-  title?: string;             // Video title (default: 'Reze Player')
-  subtitles?: Array<{
-    name: string;             // Subtitle display name
-    src: string;              // Subtitle file URL (SRT or VTT)
-    language: string;         // Language code (e.g., 'en', 'es', 'ja')
-    default?: boolean;        // Set as default subtitle
-  }>;
-  autoPlay?: boolean;         // Auto-play video (default: true)
-  volume?: number;            // Initial volume 0-1 (default: 1)
-  startTime?: number;         // Start time in seconds (default: 0)
-  enableWatchParty?: boolean; // Enable watch party feature (default: true)
-}
-```
-
-### Player Instance Methods
-
-```typescript
-interface RezePlayerInstance {
-  destroy(): void;              // Destroy player instance
-  play(): void;                 // Play video
-  pause(): void;                // Pause video
-  setVolume(volume: number): void;  // Set volume (0-1)
-  seek(time: number): void;     // Seek to time in seconds
-}
-```
-
-## Examples
-
-### HLS Stream with Subtitles
-
-```javascript
-RezePlayer.make('#player', {
-  source: {
-    title: 'Big Buck Bunny',
-    src: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-    type: 'hls'
-  },
-  subtitles: [
+  servers: [
     {
-      name: 'English',
-      language: 'en',
-      src: 'https://example.com/subtitles.srt',
-      default: true
-    }
-  ]
-});
-```
-
-### MP4 Video
-
-```javascript
-RezePlayer.make('#player', {
-  source: {
-    title: 'Sample Video',
-    src: 'https://example.com/video.mp4',
-    type: 'mp4'
-  },
-  autoPlay: false,
-  volume: 0.8
-});
-```
-
-### Multiple Subtitles
-
-```javascript
-RezePlayer.make('#player', {
-  source: {
-    src: 'https://example.com/video.m3u8'
-  },
-  subtitles: [
-    {
-      name: 'English',
-      language: 'en',
-      src: 'https://example.com/en.srt',
-      default: true
-    },
-    {
-      name: 'Japanese',
-      language: 'ja',
-      src: 'https://example.com/ja.srt'
-    },
-    {
-      name: 'Chinese',
-      language: 'zh',
-      src: 'https://example.com/zh.srt'
+      name: 'Server 1',
+      url: 'https://example.com/video.m3u8',
+      type: 'hls'
     }
   ]
 });
@@ -222,19 +219,33 @@ RezePlayer.make('#player', {
 
 ## Browser Support
 
-- Chrome/Edge 90+
-- Firefox (latest)
-- Safari (latest)
-- Mobile browsers
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Dev server
+npm run dev
+
+# Build
+npm run build
+
+# Preview build
+npm run preview
+```
 
 ## License
 
 MIT
 
-## Contributing
-
-Pull requests are welcome! For major changes, please open an issue first.
-
 ## Credits
 
 Built by [rishabnotfound](https://github.com/rishabnotfound)
+
+Based on [sudo-flix](https://github.com/sussy-code/smov)

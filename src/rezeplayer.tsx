@@ -1,4 +1,4 @@
-import "@/assets/css/index.css";
+import "@/assets/css/standalone.css";
 import "core-js/stable";
 
 import { createRoot } from "react-dom/client";
@@ -93,6 +93,9 @@ class RezePlayer {
         enableWatchParty: this.options.enableWatchParty ?? true,
       },
     };
+
+    // Add data-rezeplayer attribute to container for CSS scoping
+    this.container.setAttribute('data-rezeplayer', 'true');
 
     // Create root and render
     this.root = createRoot(this.container);

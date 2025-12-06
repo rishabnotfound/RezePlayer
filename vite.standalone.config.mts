@@ -46,6 +46,14 @@ export default defineConfig({
         {
           src: 'config.js',
           dest: '.'
+        },
+        {
+          src: 'index.html',
+          dest: '.'
+        },
+        {
+          src: 'example.html',
+          dest: '.'
         }
       ]
     }),

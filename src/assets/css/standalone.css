@@ -1,0 +1,54 @@
+/* Standalone build CSS - NO @tailwind base to avoid polluting user's page */
+
+/* Import fonts */
+@import "./index.css" layer(fonts);
+
+/* Only include Tailwind components and utilities */
+@tailwind components;
+@tailwind utilities;
+
+/* Scoped base styles for the player container only */
+@layer base {
+  /* Apply player styles to [data-rezeplayer] container */
+  [data-rezeplayer] {
+    @apply bg-background-main font-main text-type-text;
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+  }
+
+  /* For full-page standalone mode */
+  html[data-full],
+  html[data-full] body {
+    overscroll-behavior-y: none;
+  }
+
+  html[data-full] body {
+    @apply bg-background-main font-main text-type-text;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  body[data-no-scroll] {
+    overflow-y: hidden;
+    height: 100vh;
+  }
+
+  body[data-no-select] {
+    user-select: none;
+  }
+}
+
+/* Keep all other styles from index.css */
+html[data-no-scroll], html[data-no-scroll] body {
+  overflow: hidden;
+}
+
+[dir="rtl"] .transform {
+  /* Invert horizontal X offset on transform (Tailwind RTL plugin does the rest) */
+  transform: translate(calc(var(--tw-translate-x) * -1), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
+}
+[dir="ltr"] .transform {
+  /* default - otherwise it overwrites*/
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
+}
