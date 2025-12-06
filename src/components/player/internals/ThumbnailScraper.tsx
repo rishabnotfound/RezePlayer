@@ -71,8 +71,20 @@ class ThumnbnailWorker {
   private async initVideo() {
     if (!this.videoEl || !this.canvasEl) return;
     await new Promise((resolve, reject) => {
-      this.videoEl?.addEventListener("loadedmetadata", resolve);
-      this.videoEl?.addEventListener("error", reject);
+      const onLoadedMetadata = () => {
+        cleanup();
+        resolve(null);
+      };
+      const onError = (error: any) => {
+        cleanup();
+        reject(error);
+      };
+      const cleanup = () => {
+        this.videoEl?.removeEventListener("loadedmetadata", onLoadedMetadata);
+        this.videoEl?.removeEventListener("error", onError);
+      };
+      this.videoEl?.addEventListener("loadedmetadata", onLoadedMetadata);
+      this.videoEl?.addEventListener("error", onError);
     });
     if (!this.videoEl || !this.canvasEl) return;
     this.canvasEl.height = this.videoEl.videoHeight;

@@ -14,7 +14,8 @@ export class SimpleCache<Key, Value> {
     if (this._interval) throw new Error("cache is already initialized");
     this._interval = setInterval(() => {
       const now = new Date();
-      this._storage.filter((val) => {
+      // FIXED: Assign filter result back to _storage to actually remove expired items
+      this._storage = this._storage.filter((val) => {
         if (val.expiry < now) return false; // remove if expiry date is in the past
         return true;
       });
@@ -86,7 +87,8 @@ export class SimpleCache<Key, Value> {
    */
   public remove(key: Key): void {
     if (!this._compare) throw new Error("Compare function not set");
-    this._storage.filter((val) => {
+    // FIXED: Assign filter result back to _storage to actually remove items
+    this._storage = this._storage.filter((val) => {
       if (this._compare && this._compare(val.key, key)) return false; // remove if compare is success
       return true;
     });

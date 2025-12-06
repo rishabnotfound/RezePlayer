@@ -196,71 +196,81 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
           },
           renderTextTracksNatively: false,
         });
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          console.error("HLS error", data);
-          if (data.fatal && src?.url === data.frag?.baseurl) {
-            emit("error", {
-              message: data.error.message,
-              stackTrace: data.error.stack,
-              errorName: data.error.name,
-              type: "hls",
-            });
-          }
-        });
-        hls.on(Hls.Events.MANIFEST_LOADED, () => {
-          if (!hls) return;
-          reportLevels();
-          setupQualityForHls();
-          reportAudioTracks();
 
-          if (isExtensionActiveCached()) {
-            hls.on(Hls.Events.LEVEL_LOADED, async (_, data) => {
-              const chunkUrlsDomains = data.details.fragments.map(
-                (v) => new URL(v.url).hostname,
-              );
-              const chunkUrls = [...new Set(chunkUrlsDomains)];
-
-              await setDomainRule({
-                ruleId: RULE_IDS.SET_DOMAINS_HLS,
-                targetDomains: chunkUrls,
-                requestHeaders: {
-                  ...src.preferredHeaders,
-                  ...src.headers,
-                },
+        // Store HLS event handlers so they can be removed
+        const hlsHandlers = {
+          onError: (event: any, data: any) => {
+            console.error("HLS error", data);
+            if (data.fatal && src?.url === data.frag?.baseurl) {
+              emit("error", {
+                message: data.error.message,
+                stackTrace: data.error.stack,
+                errorName: data.error.name,
+                type: "hls",
               });
-            });
-            hls.on(Hls.Events.AUDIO_TRACK_LOADED, async (_, data) => {
-              const chunkUrlsDomains = data.details.fragments.map(
-                (v) => new URL(v.url).hostname,
-              );
-              const chunkUrls = [...new Set(chunkUrlsDomains)];
-
-              await setDomainRule({
-                ruleId: RULE_IDS.SET_DOMAINS_HLS_AUDIO,
-                targetDomains: chunkUrls,
-                requestHeaders: {
-                  ...src.preferredHeaders,
-                  ...src.headers,
-                },
-              });
-            });
-          }
-        });
-        hls.on(Hls.Events.LEVEL_SWITCHED, () => {
-          if (!hls) return;
-          const quality = hlsLevelToQuality(hls.levels[hls.currentLevel]);
-          emit("changedquality", quality);
-        });
-        hls.on(Hls.Events.SUBTITLE_TRACK_LOADED, () => {
-          for (const [lang, resolve] of languagePromises) {
-            const track = hls?.subtitleTracks.find((t) => t.lang === lang);
-            if (track) {
-              resolve();
-              languagePromises.delete(lang);
-              break;
             }
-          }
-        });
+          },
+          onManifestLoaded: () => {
+            if (!hls) return;
+            reportLevels();
+            setupQualityForHls();
+            reportAudioTracks();
+          },
+          onLevelLoaded: async (_: any, data: any) => {
+            if (!isExtensionActiveCached()) return;
+            const chunkUrlsDomains = data.details.fragments.map(
+              (v: any) => new URL(v.url).hostname,
+            );
+            const chunkUrls = [...new Set(chunkUrlsDomains)];
+
+            await setDomainRule({
+              ruleId: RULE_IDS.SET_DOMAINS_HLS,
+              targetDomains: chunkUrls,
+              requestHeaders: {
+                ...src.preferredHeaders,
+                ...src.headers,
+              },
+            });
+          },
+          onAudioTrackLoaded: async (_: any, data: any) => {
+            if (!isExtensionActiveCached()) return;
+            const chunkUrlsDomains = data.details.fragments.map(
+              (v: any) => new URL(v.url).hostname,
+            );
+            const chunkUrls = [...new Set(chunkUrlsDomains)];
+
+            await setDomainRule({
+              ruleId: RULE_IDS.SET_DOMAINS_HLS_AUDIO,
+              targetDomains: chunkUrls,
+              requestHeaders: {
+                ...src.preferredHeaders,
+                ...src.headers,
+              },
+            });
+          },
+          onLevelSwitched: () => {
+            if (!hls) return;
+            const quality = hlsLevelToQuality(hls.levels[hls.currentLevel]);
+            emit("changedquality", quality);
+          },
+          onSubtitleTrackLoaded: () => {
+            for (const [lang, resolve] of languagePromises) {
+              const track = hls?.subtitleTracks.find((t) => t.lang === lang);
+              if (track) {
+                resolve();
+                languagePromises.delete(lang);
+                break;
+              }
+            }
+          },
+        };
+
+        hls.on(Hls.Events.ERROR, hlsHandlers.onError);
+        hls.on(Hls.Events.MANIFEST_LOADED, hlsHandlers.onManifestLoaded);
+        hls.on(Hls.Events.LEVEL_LOADED, hlsHandlers.onLevelLoaded);
+        hls.on(Hls.Events.AUDIO_TRACK_LOADED, hlsHandlers.onAudioTrackLoaded);
+        hls.on(Hls.Events.LEVEL_SWITCHED, hlsHandlers.onLevelSwitched);
+        hls.on(Hls.Events.SUBTITLE_TRACK_LOADED, hlsHandlers.onSubtitleTrackLoaded);
       }
 
       hls.attachMedia(vid);
@@ -273,15 +283,13 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
     vid.currentTime = startAt;
   }
 
-  function setSource() {
-    if (!videoElement || !source) return;
-    setupSource(videoElement, source);
-
-    videoElement.addEventListener("play", () => {
+  // Store video element event handlers so they can be removed
+  const videoHandlers = {
+    onPlay: () => {
       emit("play", undefined);
       emit("loading", false);
-    });
-    videoElement.addEventListener("error", () => {
+    },
+    onError: () => {
       const err = videoElement?.error ?? null;
       const errorDetails = getMediaErrorDetails(err);
       emit("error", {
@@ -289,23 +297,19 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
         key: errorDetails.key,
         type: "htmlvideo",
       });
-    });
-    videoElement.addEventListener("playing", () => emit("play", undefined));
-    videoElement.addEventListener("pause", () => emit("pause", undefined));
-    videoElement.addEventListener("canplay", () => emit("loading", false));
-    videoElement.addEventListener("waiting", () => emit("loading", true));
-    videoElement.addEventListener("volumechange", () =>
+    },
+    onPlaying: () => emit("play", undefined),
+    onPause: () => emit("pause", undefined),
+    onCanPlay: () => emit("loading", false),
+    onWaiting: () => emit("loading", true),
+    onVolumeChange: () =>
       emit(
         "volumechange",
         videoElement?.muted ? 0 : (videoElement?.volume ?? 0),
       ),
-    );
-    videoElement.addEventListener("timeupdate", () =>
-      emit("time", videoElement?.currentTime ?? 0),
-    );
-    videoElement.addEventListener("loadedmetadata", () => {
+    onTimeUpdate: () => emit("time", videoElement?.currentTime ?? 0),
+    onLoadedMetadata: () => {
       if (source?.type === "mp4") {
-        // MP4 files have a single quality
         emit("qualities", ["unknown"]);
         emit("changedquality", "unknown");
       } else if (
@@ -317,38 +321,86 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
         emit("changedquality", "unknown");
       }
       emit("duration", videoElement?.duration ?? 0);
-    });
-    videoElement.addEventListener("progress", () => {
+    },
+    onProgress: () => {
       if (videoElement)
         emit(
           "buffered",
           handleBuffered(videoElement.currentTime, videoElement.buffered),
         );
-    });
-    videoElement.addEventListener("webkitendfullscreen", () => {
+    },
+    onWebkitEndFullscreen: () => {
       isFullscreen = false;
       emit("fullscreen", isFullscreen);
       if (!isFullscreen) emit("needstrack", false);
-    });
-    videoElement.addEventListener(
-      "webkitplaybacktargetavailabilitychanged",
-      (e: any) => {
-        if (e.availability === "available") {
-          emit("canairplay", true);
-        }
-      },
-    );
-    videoElement.addEventListener("ratechange", () => {
+    },
+    onWebkitPlaybackTargetAvailabilityChanged: (e: any) => {
+      if (e.availability === "available") {
+        emit("canairplay", true);
+      }
+    },
+    onRateChange: () => {
       if (videoElement) emit("playbackrate", videoElement.playbackRate);
-    });
+    },
+  };
+
+  function removeVideoElementListeners() {
+    if (!videoElement) return;
+    videoElement.removeEventListener("play", videoHandlers.onPlay);
+    videoElement.removeEventListener("error", videoHandlers.onError);
+    videoElement.removeEventListener("playing", videoHandlers.onPlaying);
+    videoElement.removeEventListener("pause", videoHandlers.onPause);
+    videoElement.removeEventListener("canplay", videoHandlers.onCanPlay);
+    videoElement.removeEventListener("waiting", videoHandlers.onWaiting);
+    videoElement.removeEventListener("volumechange", videoHandlers.onVolumeChange);
+    videoElement.removeEventListener("timeupdate", videoHandlers.onTimeUpdate);
+    videoElement.removeEventListener("loadedmetadata", videoHandlers.onLoadedMetadata);
+    videoElement.removeEventListener("progress", videoHandlers.onProgress);
+    videoElement.removeEventListener("webkitendfullscreen", videoHandlers.onWebkitEndFullscreen);
+    videoElement.removeEventListener("webkitplaybacktargetavailabilitychanged", videoHandlers.onWebkitPlaybackTargetAvailabilityChanged);
+    videoElement.removeEventListener("ratechange", videoHandlers.onRateChange);
+  }
+
+  function setSource() {
+    if (!videoElement || !source) return;
+    setupSource(videoElement, source);
+
+    // Remove existing listeners before adding new ones
+    removeVideoElementListeners();
+
+    // Add event listeners
+    videoElement.addEventListener("play", videoHandlers.onPlay);
+    videoElement.addEventListener("error", videoHandlers.onError);
+    videoElement.addEventListener("playing", videoHandlers.onPlaying);
+    videoElement.addEventListener("pause", videoHandlers.onPause);
+    videoElement.addEventListener("canplay", videoHandlers.onCanPlay);
+    videoElement.addEventListener("waiting", videoHandlers.onWaiting);
+    videoElement.addEventListener("volumechange", videoHandlers.onVolumeChange);
+    videoElement.addEventListener("timeupdate", videoHandlers.onTimeUpdate);
+    videoElement.addEventListener("loadedmetadata", videoHandlers.onLoadedMetadata);
+    videoElement.addEventListener("progress", videoHandlers.onProgress);
+    videoElement.addEventListener("webkitendfullscreen", videoHandlers.onWebkitEndFullscreen);
+    videoElement.addEventListener("webkitplaybacktargetavailabilitychanged", videoHandlers.onWebkitPlaybackTargetAvailabilityChanged);
+    videoElement.addEventListener("ratechange", videoHandlers.onRateChange);
   }
 
   function unloadSource() {
+    // Remove all video element event listeners to prevent memory leaks
+    removeVideoElementListeners();
+
     if (videoElement) {
       videoElement.removeAttribute("src");
       videoElement.load();
     }
     if (hls) {
+      // Remove all HLS event listeners before destroying
+      hls.off(Hls.Events.ERROR);
+      hls.off(Hls.Events.MANIFEST_LOADED);
+      hls.off(Hls.Events.LEVEL_LOADED);
+      hls.off(Hls.Events.AUDIO_TRACK_LOADED);
+      hls.off(Hls.Events.LEVEL_SWITCHED);
+      hls.off(Hls.Events.SUBTITLE_TRACK_LOADED);
+
       hls.destroy();
       hls = null;
     }

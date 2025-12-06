@@ -13,6 +13,8 @@ import {
 export const subtitleTypeList = list().map((type) => `.${type}`);
 const downloadCache = new SimpleCache<string, string>();
 downloadCache.setCompare((a, b) => a === b);
+// FIXED: Initialize cache to enable automatic cleanup of expired subtitles
+downloadCache.initialize();
 const expirySeconds = 24 * 60 * 60;
 
 /**

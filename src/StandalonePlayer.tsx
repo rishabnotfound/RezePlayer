@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Player } from "@/components/player";
 import { useShouldShowControls } from "@/components/player/hooks/useShouldShowControls";
 import { usePlayer } from "@/components/player/hooks/usePlayer";
@@ -16,9 +16,25 @@ export function StandalonePlayer() {
   const setEnableThumbnails = usePreferencesStore((s) => s.setEnableThumbnails);
   const [currentServerIndex, setCurrentServerIndex] = useState<number>(-1);
 
+  // Store timer IDs to prevent memory leaks
+  const initTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const subtitleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     setEnableThumbnails(true);
   }, [setEnableThumbnails]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (initTimerRef.current) {
+        clearTimeout(initTimerRef.current);
+      }
+      if (subtitleTimerRef.current) {
+        clearTimeout(subtitleTimerRef.current);
+      }
+    };
+  }, []);
 
   const status = usePlayerStore((s) => s.status);
   const isLoading = usePlayerStore((s) => s.mediaPlaying.isLoading);
@@ -60,8 +76,18 @@ export function StandalonePlayer() {
       config.settings.startTime || 0
     );
 
+    // Clear any existing timers before creating new ones
+    if (initTimerRef.current) {
+      clearTimeout(initTimerRef.current);
+      initTimerRef.current = null;
+    }
+    if (subtitleTimerRef.current) {
+      clearTimeout(subtitleTimerRef.current);
+      subtitleTimerRef.current = null;
+    }
+
     // Apply volume, autoPlay, and default subtitle after a short delay
-    setTimeout(() => {
+    initTimerRef.current = setTimeout(() => {
       const store = usePlayerStore.getState();
       const display = store.display;
 
@@ -84,7 +110,7 @@ export function StandalonePlayer() {
       console.log('Default subtitle config:', defaultSubtitle);
 
       if (defaultSubtitle) {
-        setTimeout(async () => {
+        subtitleTimerRef.current = setTimeout(async () => {
           const captionList = usePlayerStore.getState().captionList;
           console.log('Caption list:', captionList);
           console.log('Looking for subtitle ID:', defaultSubtitle.id);
@@ -117,10 +143,12 @@ export function StandalonePlayer() {
           } else {
             console.warn('Caption not found in caption list');
           }
+          subtitleTimerRef.current = null;
         }, 1000);
       } else {
         console.log('No default subtitle specified');
       }
+      initTimerRef.current = null;
     }, 100);
 
     setCurrentServerIndex(serverIndex);

@@ -1,4 +1,12 @@
-# RezePlayer
+<p align="center">
+      <img
+        src="./logo.png"
+        width="200"
+        height="200"
+      />
+    </p>
+
+# <p align="center">RezePlayer</p>
 
 A standalone HLS/MP4 video player with subtitle support, watch party, and Chromecast. Built with React.
 
