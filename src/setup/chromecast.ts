@@ -25,6 +25,11 @@ export function initializeChromecast() {
     const script = document.createElement("script");
     script.setAttribute("src", CHROMECAST_SENDER_SDK);
     script.setAttribute("id", "chromecast-script");
-    document.body.appendChild(script);
+
+    // Append to head if body doesn't exist yet
+    const target = document.body || document.head;
+    if (target) {
+      target.appendChild(script);
+    }
   }
 }

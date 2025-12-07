@@ -8,7 +8,7 @@
 
 # <p align="center">RezePlayer</p>
 
-A standalone HLS/MP4 video player with subtitle support, watch party, and Chromecast. Built with React.
+A standalone HLS/MP4 video player with subtitle support, watch party, Chromecast and Automatic Thumbnails generation. Built with React.
 
 ## Features
 
@@ -26,10 +26,10 @@ A standalone HLS/MP4 video player with subtitle support, watch party, and Chrome
 
 ```html
 <!-- Include CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.6/dist/assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.9/dist/assets/style.css">
 
 <!-- Include JS -->
-<script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.6/dist/rezeplayer.iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.9/dist/rezeplayer.iife.js"></script>
 ```
 
 ### 2. Add Container
@@ -42,31 +42,31 @@ A standalone HLS/MP4 video player with subtitle support, watch party, and Chrome
 
 ```javascript
 RezePlayer.make('#player', {
-  title: 'My Video',
+  title: 'Testing',
   servers: [
     {
       name: 'Server 1',
-      url: 'https://example.com/video.m3u8',
+      url: 'https://rezeplayer.vercel.app/reze/hls/master.m3u8',
       type: 'hls'
     },
     {
       name: 'Server 2',
-      url: 'https://example.com/video.mp4',
+      url: 'https://rezeplayer.vercel.app/reze/mp4/trailer.mp4',
       type: 'mp4'
     }
   ],
   subtitles: [
     {
       name: 'English',
-      language: 'en',
-      src: 'https://example.com/subtitles-en.srt',
-      default: true
+      flagsapi: 'https://flagsapi.com/US/flat/64.png', //optional
+      src: 'https://rezeplayer.vercel.app/reze/subs/eng.vtt',
+      default: true //optional
     }
   ],
-  autoPlay: true,
-  volume: 1,
-  startTime: 0,
-  enableWatchParty: true
+  autoPlay: true, //depends on browser policies
+  volume: 1, //range is 0 to 1
+  startTime: 0, //start position in seconds
+  enableWatchParty: true //default is true
 });
 ```
 
@@ -82,13 +82,13 @@ RezePlayer.make('#player', {
   <title>RezePlayer Example</title>
 
   <!-- Include RezePlayer CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.6/dist/assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.9/dist/assets/style.css">
 </head>
 <body>
   <div id="root"></div>
 
   <!-- Include RezePlayer JS -->
-  <script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.6/dist/rezeplayer.iife.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.9/dist/rezeplayer.iife.js"></script>
 
   <script>
     RezePlayer.make('#root', {

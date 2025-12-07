@@ -1,283 +1,561 @@
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8" />
   <link rel="icon" href="/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="RezePlayer - Standalone HLS Video Player" />
+  <meta name="description" content="RezePlayer - HLS/MP4 Video Player" />
   <title>RezePlayer - Docs</title>
-
   <style>
+    /* VARIABLES */
+    :root {
+      --color-background: #0a0014;
+      --color-foreground: #ffffff;
+      --color-primary: #a855f7;
+      --color-secondary: #1a0f2e;
+      --color-border: #2d1b4e;
+      --color-text-subtle: #b8a8d8;
+      --code-color-keyword: #c084fc;
+      --code-color-string: #f0abfc;
+      --code-color-comment: #9333ea;
+      --code-color-property: #e9d5ff;
+      --code-color-number: #d8b4fe;
+      --code-color-tag: #a855f7;
+    }
+    /* BASE STYLES */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-      background: #000000;
-      color: #e0e0e0;
+      background: var(--color-background);
+      color: var(--color-foreground);
       line-height: 1.6;
-      padding: 20px;
+      padding-top: 80px;
     }
-
     .container {
       max-width: 900px;
       margin: 0 auto;
+      padding: 20px;
     }
-
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--color-border);
+      z-index: 1000;
+      padding: 0 20px;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-foreground);
+      text-decoration: none;
+    }
+    .nav-logo img {
+      width: 35px;
+      height: 35px;
+      border-radius: 8px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--color-text-subtle);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--color-primary);
+    }
+    .nav-links a.active {
+      color: var(--color-primary);
+    }
+    .nav-cta {
+      background: var(--color-primary);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .nav-cta:hover {
+      background: #c084fc !important;
+      color: #fff !important;
+      transform: translateY(-1px);
+    }
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 5px;
+    }
+    .hamburger span {
+      width: 25px;
+      height: 2px;
+      background: var(--color-foreground);
+      transition: all 0.3s;
+    }
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(7px, 7px);
+    }
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(6px, -6px);
+    }
+    /* MOBILE MENU */
+    @media (max-width: 768px) {
+      .hamburger {
+        display: flex;
+      }
+      .nav-links {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        gap: 0;
+        padding: 20px;
+        border-bottom: 1px solid var(--color-border);
+        transform: translateY(-100%);
+        opacity: 0;
+        transition: transform 0.3s, opacity 0.3s;
+        pointer-events: none;
+      }
+      .nav-links.active {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: all;
+      }
+      .nav-links a {
+        padding: 15px 0;
+        width: 100%;
+        text-align: center;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .nav-links a:last-child {
+        border-bottom: none;
+      }
+    }
+    /* TYPOGRAPHY */
     h1 {
-      color: #ffffff;
+      color: var(--color-foreground);
       font-size: 2.5rem;
       margin-bottom: 0.5rem;
       font-weight: 700;
     }
-
     .subtitle {
-      color: #888;
+      color: var(--color-text-subtle);
       font-size: 1.1rem;
       margin-bottom: 3rem;
     }
-
     h2 {
-      color: #ffffff;
+      color: var(--color-foreground);
       font-size: 1.8rem;
       margin-top: 3rem;
       margin-bottom: 1rem;
-      border-bottom: 2px solid #222;
+      border-bottom: 1px solid var(--color-border);
       padding-bottom: 0.5rem;
     }
-
     h3 {
-      color: #ffffff;
+      color: var(--color-foreground);
       font-size: 1.3rem;
       margin-top: 2rem;
       margin-bottom: 0.8rem;
     }
-
     p {
       margin-bottom: 1rem;
-      color: #b0b0b0;
+      color: var(--color-foreground);
     }
-
+    ul {
+      margin-left: 2rem;
+      margin-bottom: 1rem;
+      list-style-type: square;
+    }
+    li {
+      margin-bottom: 0.5rem;
+      color: var(--color-foreground);
+    }
+    /* CODE STYLES */
     code {
-      background: #1a1a1a;
+      background: #111111;
       padding: 2px 8px;
       border-radius: 4px;
       font-family: 'Courier New', monospace;
-      color: #00ff88;
+      color: var(--color-primary);
       font-size: 0.9em;
     }
-
     pre {
       background: #0a0a0a;
-      border: 1px solid #222;
+      border: 1px solid var(--color-border);
       border-radius: 8px;
       padding: 1.5rem;
       overflow-x: auto;
       margin: 1.5rem 0;
+      position: relative;
     }
-
     pre code {
       background: transparent;
       padding: 0;
-      color: #e0e0e0;
+      color: var(--color-foreground);
+      display: block;
     }
-
+    .c { color: var(--code-color-comment); }
+    .k { color: var(--code-color-keyword); }
+    .s { color: var(--code-color-string); }
+    .n { color: var(--code-color-property); }
+    .l { color: var(--code-color-number); }
+    .t { color: var(--code-color-tag); }
+    .a { color: var(--code-color-property); }
+    .v { color: #569cd6; }
+    /* BUTTONS AND LINKS */
     .demo-link {
       display: inline-block;
-      background: #ffffff;
-      color: #000000;
-      padding: 12px 24px;
+      background: var(--color-primary);
+      color: #ffffff;
+      padding: 10px 20px;
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
       margin-top: 1rem;
       margin-right: 1rem;
-      transition: transform 0.2s;
+      transition: background-color 0.2s, transform 0.2s;
     }
-
     .demo-link:hover {
-      transform: translateY(-2px);
-      background: #f0f0f0;
+      transform: translateY(-1px);
+      background: #c084fc;
     }
-
     .demo-link.secondary {
-      background: #1a1a1a;
-      color: #ffffff;
-      border: 1px solid #333;
+      background: transparent;
+      color: var(--color-primary);
+      border: 1px solid var(--color-primary);
     }
-
     .demo-link.secondary:hover {
-      background: #222;
+      background: rgba(168, 85, 247, 0.1);
     }
-
-    ul {
-      margin-left: 2rem;
-      margin-bottom: 1rem;
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #111111;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-subtle);
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background 0.2s, color 0.2s;
+      z-index: 10;
     }
-
-    li {
-      margin-bottom: 0.5rem;
-      color: #b0b0b0;
+    .copy-btn:hover {
+      background: #1a1a1a;
+      color: var(--color-foreground);
     }
-
+    .copy-btn.copied {
+      background: var(--color-primary);
+      color: var(--color-background);
+    }
     .feature-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 1.5rem;
       margin: 2rem 0;
     }
-
     .feature-card {
-      background: #0a0a0a;
-      border: 1px solid #222;
+      background: var(--color-secondary);
+      border: 1px solid var(--color-border);
       border-radius: 8px;
       padding: 1.5rem;
+      transition: transform 0.2s;
     }
-
+    .feature-card:hover {
+      transform: translateY(-2px);
+    }
     .feature-card h4 {
-      color: #ffffff;
+      color: var(--color-foreground);
       margin-bottom: 0.5rem;
     }
-
     .feature-card p {
-      color: #888;
+      color: var(--color-text-subtle);
       font-size: 0.9rem;
     }
-
-    .highlight {
-      color: #00ff88;
+    .api-option {
+      display: flex;
+      flex-direction: column;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--color-border);
+      transition: background-color 0.2s;
+      cursor: default;
     }
-
+    .api-option:hover {
+      background-color: #0a0a0a;
+    }
+    .api-option-signature {
+      margin-bottom: 5px;
+    }
+    .api-option-signature strong {
+      font-weight: 600;
+      color: var(--code-color-keyword);
+    }
+    .api-option-description {
+      color: var(--color-text-subtle);
+      font-size: 0.95rem;
+    }
+    .highlight {
+      color: var(--code-color-keyword);
+      font-weight: bold;
+      margin-left: 5px;
+    }
     .note {
-      background: #1a1a0a;
+      background: rgba(255, 170, 0, 0.1);
       border-left: 4px solid #ffaa00;
       padding: 1rem;
       margin: 1.5rem 0;
       border-radius: 4px;
     }
-
     .note p {
       margin: 0;
       color: #ffcc66;
     }
+    .made-with-love {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      font-size: 1rem;
+      color: var(--color-text-subtle);
+      opacity: 0.8;
+    }
+    .made-with-love span {
+      color: #ff2e63;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>RezePlayer</h1>
-    <p class="subtitle">A standalone HLS video player built with React</p>
-
-    <div>
-      <a href="./example.html" class="demo-link">View Demo</a>
-      <a href="https://github.com/yourusername/rezeplayer" class="demo-link secondary">GitHub</a>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="./" class="nav-logo">
+        <img src="/logo.png" alt="RezePlayer">
+        <span>RezePlayer</span>
+      </a>
+      <div class="nav-links">
+        <a href="./" class="active">Docs</a>
+        <a href="./example.html">Example</a>
+        <a href="https://github.com/rishabnotfound/rezeplayer" target="_blank" class="nav-cta">GitHub</a>
+      </div>
+      <button class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
+  </nav>
 
-    <h2>Features</h2>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <h4>Multiple Sources</h4>
-        <p>Support for HLS and MP4 with seamless switching between sources</p>
-      </div>
-      <div class="feature-card">
-        <h4>Subtitles</h4>
-        <p>Multi-language subtitle support with customizable styling</p>
-      </div>
-      <div class="feature-card">
-        <h4>Watch Party</h4>
-        <p>Synchronized viewing experience with friends</p>
-      </div>
-      <div class="feature-card">
-        <h4>Chromecast</h4>
-        <p>Cast to any Chromecast-enabled device</p>
-      </div>
+  <div class="container">
+    <p align="center">
+      <img src="/logo.png" width="200" height="200" />
+    </p>
+
+    <h1 align="center">RezePlayer</h1>
+
+    <p style="text-align:center; margin-bottom:10px;">
+      A good looking HLS/MP4 video player built with React
+    </p>
+
+    <div style="display:flex; justify-content:center; gap:12px;">
+      <a href="./example.html" class="demo-link">Try Example</a>
+      <a href="https://github.com/rishabnotfound/rezeplayer" class="demo-link secondary">GitHub</a>
     </div>
 
     <h2>Quick Start</h2>
-
-    <h3>1. Include CSS and JS</h3>
-    <pre><code>&lt;link rel="stylesheet" href="./dist/assets/style.css"&gt;
-&lt;script src="./dist/rezeplayer.iife.js"&gt;&lt;/script&gt;</code></pre>
-
-    <h3>2. Add Container</h3>
-    <pre><code>&lt;div id="player"&gt;&lt;/div&gt;</code></pre>
-
-    <h3>3. Initialize Player</h3>
-    <pre><code>RezePlayer.make('#player', {
-  title: 'My Video',
-  servers: [
+    <p>Get up and running in three simple steps.</p>
+    <h3>1. Full Page Mode IMPORTANT</h3>
+    <p>For a clean, full-page player experience, add the <code class="n">data-full</code> attribute to your root <code class="t">html</code> tag, or else player styling will be broken cuz of tailwind limitation of preflight lmao</p>
+    <pre><button class="copy-btn" data-target="code5">Copy</button><code id="code5">&lt;<span class="t">html</span> <span class="a">lang</span>=<span class="s">"en"</span> <span class="a">data-full</span>&gt;</code></pre>
+    <h3>2. Include CSS and JS</h3>
+    <pre><button class="copy-btn" data-target="code1">Copy</button><code id="code1">&lt;<span class="t">link</span> <span class="a">rel</span>=<span class="s">"stylesheet"</span> <span class="a">href</span>=<span class="s">""https://cdn.jsdelivr.net/npm/rezeplayer@1.1.8/dist/assets/style.css"</span>&gt;
+&lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://cdn.jsdelivr.net/npm/rezeplayer@1.1.8/dist/rezeplayer.iife.js"</span>&gt;&lt;/<span class="t">script</span>&gt;</code></pre>
+    <h3>3. Add Container</h3>
+    <p>The player will be initialized inside this element.</p>
+    <pre><button class="copy-btn" data-target="code2">Copy</button><code id="code2">&lt;<span class="t">div</span> <span class="a">id</span>=<span class="s">"player"</span>&gt;&lt;/<span class="t">div</span>&gt;</code></pre>
+    <h3>4. Initialize Player</h3>
+    <p>Call the <code class="k">RezePlayer.make()</code> method with your target element and options.</p>
+    <pre><button class="copy-btn" data-target="code3">Copy</button><code id="code3"><span class="n">RezePlayer</span>.<span class="n">make</span>(<span class="s">'#player'</span>, {
+  <span class="n">title</span>: <span class="s">'Testing'</span>,
+  <span class="n">servers</span>: [
     {
-      name: 'Server 1',
-      url: 'https://example.com/video.m3u8',
-      type: 'hls'
+      <span class="n">name</span>: <span class="s">'Server 1'</span>,
+      <span class="n">url</span>: <span class="s">'https://rezeplayer.vercel.app/reze/hls/master.m3u8'</span>,
+      <span class="n">type</span>: <span class="s">'hls'</span>
     },
     {
-      name: 'Server 2',
-      url: 'https://example.com/video.mp4',
-      type: 'mp4'
+      <span class="n">name</span>: <span class="s">'Server 2'</span>,
+      <span class="n">url</span>: <span class="s">'https://rezeplayer.vercel.app/reze/mp4/trailer.mp4'</span>,
+      <span class="n">type</span>: <span class="s">'mp4'</span>
     }
   ],
-  subtitles: [
+  <span class="n">subtitles</span>: [
     {
-      name: 'English',
-      language: 'en',
-      src: 'https://example.com/subtitles-en.srt',
-      default: true
+      <span class="n">name</span>: <span class="s">'English'</span>,
+      <span class="n">flagsapi</span>: <span class="s">'https://flagsapi.com/US/flat/64.png'</span>, //optional
+      <span class="n">src</span>: <span class="s">'https://rezeplayer.vercel.app/reze/subs/eng.vtt'</span>,
+      <span class="n">default</span>: <span class="k">true</span> //optional
     }
   ],
-  autoPlay: true,
-  volume: 1,
-  startTime: 0,
-  enableWatchParty: true
+  <span class="n">autoPlay</span>: <span class="k">true</span>, //depends on browser policies
+  <span class="n">volume</span>: <span class="l">1</span>, //range is 0 to 1
+  <span class="n">startTime</span>: <span class="l">0</span>, //start position in seconds
+  <span class="n">enableWatchParty</span>: <span class="k">true</span> //default is true
 });</code></pre>
-
     <h2>API Reference</h2>
-
     <h3>Options</h3>
-    <p><code>servers</code> <span class="highlight">Array (required)</span> - List of video sources</p>
-    <p><code>title</code> <span class="highlight">String</span> - Video title displayed in player</p>
-    <p><code>subtitles</code> <span class="highlight">Array</span> - List of subtitle tracks</p>
-    <p><code>autoPlay</code> <span class="highlight">Boolean</span> - Auto-play on load (default: true)</p>
-    <p><code>volume</code> <span class="highlight">Number</span> - Initial volume 0-1 (default: 1)</p>
-    <p><code>startTime</code> <span class="highlight">Number</span> - Start position in seconds (default: 0)</p>
-    <p><code>enableWatchParty</code> <span class="highlight">Boolean</span> - Enable watch party feature (default: true)</p>
-
-    <h3>Methods</h3>
-    <pre><code>const player = RezePlayer.make('#player', options);
-
-// Control playback
-player.play();
-player.pause();
-
-// Seek to time
-player.seek(120); // seek to 2 minutes
-
-// Set volume
-player.setVolume(0.5); // 50% volume
-
-// Destroy player
-player.destroy();</code></pre>
-
-    <h2>Full Page Mode</h2>
-    <p>For a full-page player experience, add the <code>data-full</code> attribute to your HTML tag:</p>
-    <pre><code>&lt;html lang="en" data-full&gt;</code></pre>
-
-    <div class="note">
-      <p><strong>Note:</strong> The player uses scoped CSS to avoid conflicts with your page styles. All styles are contained within the player container.</p>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>servers</code> <span class="highlight">Array (required)</span>
+      </div>
+      <div class="api-option-description">
+        List of video sources. Each object requires <code>name</code>, <code>url</code>, and <code>type</code> (hls or mp4).
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>title</code> <span class="highlight">String</span>
+      </div>
+      <div class="api-option-description">
+        Video title displayed in the player UI.
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>subtitles</code> <span class="highlight">Array</span>
+      </div>
+      <div class="api-option-description">
+        List of subtitle tracks. Objects require <code>name</code>, <code>flagsapi</code>, and <code>src</code>.
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>autoPlay</code> <span class="highlight">Boolean</span>
+      </div>
+      <div class="api-option-description">
+        Auto-play on load (default: <code class="k">true</code>). Note: Browser policies might override this.
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>volume</code> <span class="highlight">Number</span>
+      </div>
+      <div class="api-option-description">
+        Initial volume level between 0 and 1 (default: <code class="l">1</code>).
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>startTime</code> <span class="highlight">Number</span>
+      </div>
+      <div class="api-option-description">
+        Start position in seconds (default: <code class="l">0</code>).
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>enableWatchParty</code> <span class="highlight">Boolean</span>
+      </div>
+      <div class="api-option-description">
+        Enable the synchronized watch party feature (default: <code class="k">true</code>).
+      </div>
     </div>
 
-    <h2>Browser Support</h2>
-    <ul>
-      <li>Chrome 90+</li>
-      <li>Firefox 88+</li>
-      <li>Safari 14+</li>
-      <li>Edge 90+</li>
-    </ul>
-
-    <h2>License</h2>
-    <p>MIT License - Feel free to use in your projects</p>
+    <h3>Methods</h3>
+    <p>The <code class="n">RezePlayer.make()</code> call returns a player instance with the following methods:</p>
+    <pre><button class="copy-btn" data-target="code4">Copy</button><code id="code4"><span class="k">const</span> <span class="n">player</span> = <span class="n">RezePlayer</span>.<span class="n">make</span>(<span class="s">'#player'</span>, <span class="n">options</span>);
+<span class="c">// Control playback</span>
+<span class="n">player</span>.<span class="n">play</span>();
+<span class="n">player</span>.<span class="n">pause</span>();
+<span class="c">// Seek to time</span>
+<span class="n">player</span>.<span class="n">seek</span>(<span class="l">120</span>); <span class="c">// seek to 2 minutes</span>
+<span class="c">// Set volume</span>
+<span class="n">player</span>.<span class="n">setVolume</span>(<span class="l">0.5</span>); <span class="c">// 50% volume</span>
+<span class="c">// Destroy player</span>
+<span class="n">player</span>.<span class="n">destroy</span>();</code></pre>
+    <div class="note">
+      <p>⚠️ <strong>Note:</strong> The player uses **scoped CSS** to avoid conflicts with your page styles. All player-specific styles are contained within the main player container.</p>
+    </div>
+    <div class="made-with-love">
+      Made with <span>❤️</span> by R
+    </div>
   </div>
+
+  <script>
+    // Hamburger Menu Toggle
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.querySelector('.nav-links');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('active');
+      }
+    });
+
+    // Copy-to-Clipboard functionality
+    document.addEventListener('DOMContentLoaded', () => {
+      const copyButtons = document.querySelectorAll('.copy-btn');
+      copyButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetId = button.getAttribute('data-target');
+          const targetCodeElement = document.getElementById(targetId);
+          if (targetCodeElement) {
+            const textToCopy = targetCodeElement.textContent.trim();
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+              const originalText = button.textContent;
+              button.textContent = 'Copied!';
+              button.classList.add('copied');
+              setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('copied');
+              }, 1500);
+            }).catch(err => {
+              console.error('Could not copy text: ', err);
+            });
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
