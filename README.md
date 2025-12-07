@@ -79,12 +79,12 @@ RezePlayer.make('#player', {
 # NPM USAGE
 
 ### INSTALLATION
-```
+```bash
 npm install rezeplayer
 ```
 
 ### IMPORT AND INITIALIZE
-```react
+```javascript
 import { make } from 'rezeplayer';
 import 'rezeplayer/dist/assets/style.css';
 
