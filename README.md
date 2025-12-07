@@ -276,7 +276,7 @@ npm run preview
 
 ## License
 
-MIT
+[MIT](LICENSE)
 
 ## Credits
 
