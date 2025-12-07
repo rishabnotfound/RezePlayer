@@ -22,7 +22,13 @@ A standalone HLS/MP4 video player with subtitle support, watch party, Chromecast
 
 ## Quick Start
 
-### 1. Include CSS and JS
+### 1. Full Page Mode IMPORTANT
+For a clean, full-page player experience, add the data-full attribute to your root html tag, or else player styling will be broken cuz of tailwind limitation of preflight lmao
+```html
+<html lang="en" data-full>
+```
+
+### 2. Include CSS and JS
 
 ```html
 <!-- Include CSS -->
@@ -32,13 +38,13 @@ A standalone HLS/MP4 video player with subtitle support, watch party, Chromecast
 <script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.10/dist/rezeplayer.iife.js"></script>
 ```
 
-### 2. Add Container
+### 3. Add Container
 
 ```html
 <div id="player"></div>
 ```
 
-### 3. Initialize Player
+### 4. Initialize Player
 
 ```javascript
 RezePlayer.make('#player', {
@@ -70,6 +76,28 @@ RezePlayer.make('#player', {
 });
 ```
 
+# NPM USAGE
+
+### INSTALLATION
+```
+npm install rezeplayer
+```
+
+### IMPORT AND INITIALIZE
+```react
+import { make } from 'rezeplayer';
+import 'rezeplayer/dist/assets/style.css';
+
+const player = make('#player', {
+  servers: [
+    {
+      name: 'Server 1',
+      url: 'https://example.com/video.m3u8',
+      type: 'hls'
+    }
+  ]
+});
+```
 ## Full Example
 
 ```html
@@ -229,27 +257,6 @@ For embedded use on existing pages, just use a regular container:
 ```
 
 The player uses scoped CSS to avoid conflicts with your page styles.
-
-## NPM Usage
-
-```bash
-npm install rezeplayer
-```
-
-```javascript
-import { make } from 'rezeplayer';
-import 'rezeplayer/dist/assets/style.css';
-
-const player = make('#player', {
-  servers: [
-    {
-      name: 'Server 1',
-      url: 'https://example.com/video.m3u8',
-      type: 'hls'
-    }
-  ]
-});
-```
 
 ## Browser Support
 

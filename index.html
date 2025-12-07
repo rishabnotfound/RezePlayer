@@ -434,6 +434,22 @@
   <span class="n">startTime</span>: <span class="l">0</span>, //start position in seconds
   <span class="n">enableWatchParty</span>: <span class="k">true</span> //default is true
 });</code></pre>
+    <h2>NPM Usage</h2>
+    <h3>Installation</h3>
+    <pre><button class="copy-btn" data-target="code6">Copy</button><code id="code6">npm install rezeplayer</code></pre>
+    <h3>Import and Initialize</h3>
+    <pre><button class="copy-btn" data-target="code7">Copy</button><code id="code7"><span class="k">import</span> { <span class="n">make</span> } <span class="k">from</span> <span class="s">'rezeplayer'</span>;
+<span class="k">import</span> <span class="s">'rezeplayer/dist/assets/style.css'</span>;
+
+<span class="k">const</span> <span class="n">player</span> = <span class="n">make</span>(<span class="s">'#player'</span>, {
+  <span class="n">servers</span>: [
+    {
+      <span class="n">name</span>: <span class="s">'Server 1'</span>,
+      <span class="n">url</span>: <span class="s">'https://example.com/video.m3u8'</span>,
+      <span class="n">type</span>: <span class="s">'hls'</span>
+    }
+  ]
+});</code></pre>
     <h2>API Reference</h2>
     <h3>Options</h3>
     <div class="api-option">
