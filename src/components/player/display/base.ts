@@ -86,6 +86,7 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
     string,
     (value: void | PromiseLike<void>) => void
   >();
+  const subtitleTimeouts = new Map<string, NodeJS.Timeout>();
 
   function reportLevels() {
     if (!hls) return;
@@ -418,7 +419,28 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
       !!document.fullscreenElement || // other browsers
       !!(document as any).webkitFullscreenElement; // safari
     emit("fullscreen", isFullscreen);
-    if (!isFullscreen) emit("needstrack", false);
+    if (!isFullscreen) {
+      emit("needstrack", false);
+      // Unlock orientation when exiting fullscreen
+      if (screen.orientation && screen.orientation.unlock) {
+        try {
+          screen.orientation.unlock();
+        } catch (e) {
+          // Silently ignore if not supported
+        }
+      }
+    } else {
+      // Lock orientation to landscape when entering fullscreen
+      if (screen.orientation && screen.orientation.lock) {
+        try {
+          screen.orientation.lock('landscape').catch(() => {
+            // Silently ignore if not supported
+          });
+        } catch (e) {
+          // Silently ignore if not supported
+        }
+      }
+    }
   }
   fscreen.addEventListener("fullscreenchange", fullscreenChange);
 
@@ -429,6 +451,13 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
       return "web";
     },
     destroy: () => {
+      // Clear all subtitle loading timeouts to prevent memory leaks
+      subtitleTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+      subtitleTimeouts.clear();
+
+      // Clear all pending language promises
+      languagePromises.clear();
+
       destroyVideoElement();
       fscreen.removeEventListener("fullscreenchange", fullscreenChange);
     },
@@ -513,6 +542,14 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
         isFullscreen = false;
         emit("fullscreen", isFullscreen);
         emit("needstrack", false);
+        // Unlock orientation when exiting fullscreen
+        if (screen.orientation && screen.orientation.unlock) {
+          try {
+            screen.orientation.unlock();
+          } catch (e) {
+            // Silently ignore if not supported
+          }
+        }
         if (!fscreen.fullscreenElement) return;
         fscreen.exitFullscreen();
         return;
@@ -523,13 +560,38 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
       emit("fullscreen", isFullscreen);
       if (!canFullscreen() || fscreen.fullscreenElement) return;
       if (canFullscreenAnyElement()) {
-        if (containerElement) fscreen.requestFullscreen(containerElement);
+        if (containerElement) {
+          fscreen.requestFullscreen(containerElement).then(() => {
+            // Lock orientation to landscape after entering fullscreen
+            if (screen.orientation && screen.orientation.lock) {
+              try {
+                screen.orientation.lock('landscape').catch(() => {
+                  // Silently ignore if not supported
+                });
+              } catch (e) {
+                // Silently ignore if not supported
+              }
+            }
+          }).catch(() => {
+            // Fullscreen request failed
+          });
+        }
         return;
       }
       if (canWebkitFullscreen()) {
         if (videoElement) {
           emit("needstrack", true);
           (videoElement as any).webkitEnterFullscreen();
+          // Lock orientation to landscape for webkit fullscreen
+          if (screen.orientation && screen.orientation.lock) {
+            try {
+              screen.orientation.lock('landscape').catch(() => {
+                // Silently ignore if not supported
+              });
+            } catch (e) {
+              // Silently ignore if not supported
+            }
+          }
         }
       }
     },
@@ -581,16 +643,27 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
       const track = hls?.subtitleTracks.find((t) => t.lang === lang);
       if (track?.details !== undefined) return Promise.resolve();
 
+      // Clear any existing timeout for this language
+      const existingTimeout = subtitleTimeouts.get(lang);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+        subtitleTimeouts.delete(lang);
+      }
+
       // need to wait a moment before hls loads the subtitles
       const promise = new Promise<void>((resolve, reject) => {
         languagePromises.set(lang, resolve);
 
         // reject after some time, if hls.js fails to load the subtitles
         // for any reason
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           reject();
           languagePromises.delete(lang);
+          subtitleTimeouts.delete(lang);
         }, 5000);
+
+        // Store timeout ID so it can be cleared later
+        subtitleTimeouts.set(lang, timeoutId);
       });
       hls?.setSubtitleOption({ lang });
       return promise;

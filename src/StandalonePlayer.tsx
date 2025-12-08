@@ -16,6 +16,10 @@ export function StandalonePlayer() {
   const setEnableThumbnails = usePreferencesStore((s) => s.setEnableThumbnails);
   const [currentServerIndex, setCurrentServerIndex] = useState<number>(-1);
 
+  // Get enableCast setting from config (default: true)
+  const config = (window as any).__REZEPLAYER_CONFIG__;
+  const enableCast = config?.settings?.enableCast ?? true;
+
   // Store timer IDs to prevent memory leaks
   const initTimerRef = useRef<NodeJS.Timeout | null>(null);
   const subtitleTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -260,9 +264,10 @@ export function StandalonePlayer() {
         </div>
         <div className="grid grid-cols-[2.5rem,1fr,2.5rem] gap-3 lg:hidden">
           <div />
-          <div className="flex justify-center space-x-3">
+          <div className="flex justify-center items-center space-x-3">
             {status === playerStatus.PLAYING ? (
               <>
+                <Player.Time short />
                 <Player.Pip />
                 <Player.Settings />
               </>

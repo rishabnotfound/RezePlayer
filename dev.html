@@ -21,8 +21,8 @@
   <script>
     // Initialize RezePlayer with ALL servers from server.ts
     // User can switch between servers in the Sources menu
-    RezePlayer.make('#root', {
-      title: 'Reze Player',
+    const player = RezePlayer.make('#root', {
+      title: 'RezePlayer',
       servers: [
         {
           name: 'HLS Sample',
@@ -73,11 +73,48 @@
           src: 'https://rezeplayer.vercel.app/reze/subs/arabic.vtt',
         }
       ],
-      autoPlay: true,
+      posterUrl: 'https://rezeplayer.vercel.app/reze/poster.png',
+      autoPlay: false,
       volume: 1,
       startTime: 0,
-      enableWatchParty: true
+      enableWatchParty: true,
+      enableCast: true,
+      //themeColor: 'e01621',
+      thumbsInterval: 10000, // 10 seconds
     });
+
+    // Time tracking - Log every 1 second to avoid spam
+    let lastLogTime = 0;
+    player.on('timeupdate', ({ currentTime, duration }) => {
+      // Only log once per second
+      if (Math.floor(currentTime) !== lastLogTime) {
+        lastLogTime = Math.floor(currentTime);
+        const progress = (currentTime / duration) * 100;
+        console.log(`[RezePlayer Time Tracking]`);
+        console.log(`  Current Time: ${formatTime(currentTime)}`);
+        console.log(`  Duration: ${formatTime(duration)}`);
+        console.log(`  Progress: ${progress.toFixed(2)}%`);
+      }
+    });
+
+    // Log when duration changes (video loaded)
+    player.on('durationchange', ({ currentTime, duration }) => {
+      console.log(`[RezePlayer Duration Change]`);
+      console.log(`  Video Duration: ${formatTime(duration)}`);
+      console.log(`  Current Time: ${formatTime(currentTime)}`);
+    });
+
+    // Helper function to format time as MM:SS
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Also expose player to window for manual testing in console
+    window.player = player;
+    console.log('[RezePlayer] Player instance available at window.player');
+    console.log('[RezePlayer] Try: player.getCurrentTime(), player.getDuration(), player.seek(30)');
   </script>
 </body>
 </html>

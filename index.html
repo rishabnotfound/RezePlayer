@@ -355,6 +355,11 @@
     .made-with-love span {
       color: #ff2e63;
     }
+    .made-with-love a {
+      color: #ff2e63;
+      text-decoration: none;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -400,8 +405,8 @@
     <p>For a clean, full-page player experience, add the <code class="n">data-full</code> attribute to your root <code class="t">html</code> tag, or else player styling will be broken cuz of tailwind limitation of preflight lmao</p>
     <pre><button class="copy-btn" data-target="code5">Copy</button><code id="code5">&lt;<span class="t">html</span> <span class="a">lang</span>=<span class="s">"en"</span> <span class="a">data-full</span>&gt;</code></pre>
     <h3>2. Include CSS and JS</h3>
-    <pre><button class="copy-btn" data-target="code1">Copy</button><code id="code1">&lt;<span class="t">link</span> <span class="a">rel</span>=<span class="s">"stylesheet"</span> <span class="a">href</span>=<span class="s">""https://cdn.jsdelivr.net/npm/rezeplayer@1.1.10/dist/assets/style.css"</span>&gt;
-&lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://cdn.jsdelivr.net/npm/rezeplayer@1.1.10/dist/rezeplayer.iife.js"</span>&gt;&lt;/<span class="t">script</span>&gt;</code></pre>
+    <pre><button class="copy-btn" data-target="code1">Copy</button><code id="code1">&lt;<span class="t">link</span> <span class="a">rel</span>=<span class="s">"stylesheet"</span> <span class="a">href</span>=<span class="s">""https://cdn.jsdelivr.net/npm/rezeplayer@1.1.11/dist/assets/style.css"</span>&gt;
+&lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://cdn.jsdelivr.net/npm/rezeplayer@1.1.11/dist/rezeplayer.iife.js"</span>&gt;&lt;/<span class="t">script</span>&gt;</code></pre>
     <h3>3. Add Container</h3>
     <p>The player will be initialized inside this element.</p>
     <pre><button class="copy-btn" data-target="code2">Copy</button><code id="code2">&lt;<span class="t">div</span> <span class="a">id</span>=<span class="s">"player"</span>&gt;&lt;/<span class="t">div</span>&gt;</code></pre>
@@ -429,10 +434,14 @@
       <span class="n">default</span>: <span class="k">true</span> //optional
     }
   ],
+  <span class="n">posterUrl</span>: <span class="s">'https://rezeplayer.vercel.app/reze/poster.png'</span>, //optional
   <span class="n">autoPlay</span>: <span class="k">true</span>, //depends on browser policies
   <span class="n">volume</span>: <span class="l">1</span>, //range is 0 to 1
   <span class="n">startTime</span>: <span class="l">0</span>, //start position in seconds
-  <span class="n">enableWatchParty</span>: <span class="k">true</span> //default is true
+  <span class="n">enableWatchParty</span>: <span class="k">true</span>, //default is true
+  <span class="n">enableCast</span>: <span class="k">true</span>, //default is true
+  <span class="n">themeColor</span>: <span class="s">'8652bb'</span>, //default is 8652bb
+  <span class="n">thumbsInterval</span>: <span class="l">10000</span> //thumbnail interval in ms (default: 10000 = 10s) 
 });</code></pre>
     <h2>NPM Usage</h2>
     <h3>Installation</h3>
@@ -508,25 +517,131 @@
         Enable the synchronized watch party feature (default: <code class="k">true</code>).
       </div>
     </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>enableCast</code> <span class="highlight">Boolean</span>
+      </div>
+      <div class="api-option-description">
+        Enable Chromecast feature (default: <code class="k">true</code>). Chromecast option appears in settings menu.
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>posterUrl</code> <span class="highlight">String</span>
+      </div>
+      <div class="api-option-description">
+        URL of poster image to display before video plays (optional).
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>themeColor</code> <span class="highlight">String</span>
+      </div>
+      <div class="api-option-description">
+        Custom theme color (hex value without #, e.g., <code class="s">"e01621"</code>). Applies to progress bars, volume slider, switches, and checkmarks in settings menu (optional).
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>thumbsInterval</code> <span class="highlight">Number</span>
+      </div>
+      <div class="api-option-description">
+        Thumbnail generation interval in milliseconds. For example, <code class="l">10000</code> means thumbnails will be generated every 10 seconds. Default: <code class="l">10000</code> (optional).
+
+        <div>WILL ADVICE TO KEEP IT 10s OR HIGHER TO AVOID PERFORMANCE ISSUES (MEMORY LEAK)</div>
+      </div>
+    </div>
 
     <h3>Methods</h3>
     <p>The <code class="n">RezePlayer.make()</code> call returns a player instance with the following methods:</p>
     <pre><button class="copy-btn" data-target="code4">Copy</button><code id="code4"><span class="k">const</span> <span class="n">player</span> = <span class="n">RezePlayer</span>.<span class="n">make</span>(<span class="s">'#player'</span>, <span class="n">options</span>);
-<span class="c">// Control playback</span>
+
+<span class="c">// Playback Control</span>
 <span class="n">player</span>.<span class="n">play</span>();
 <span class="n">player</span>.<span class="n">pause</span>();
+
 <span class="c">// Seek to time</span>
 <span class="n">player</span>.<span class="n">seek</span>(<span class="l">120</span>); <span class="c">// seek to 2 minutes</span>
+
 <span class="c">// Set volume</span>
 <span class="n">player</span>.<span class="n">setVolume</span>(<span class="l">0.5</span>); <span class="c">// 50% volume</span>
-<span class="c">// Destroy player</span>
+
+<span class="c">// Time tracking</span>
+<span class="k">const</span> <span class="n">currentTime</span> = <span class="n">player</span>.<span class="n">getCurrentTime</span>();  <span class="c">// Get current playback time in seconds</span>
+<span class="k">const</span> <span class="n">duration</span> = <span class="n">player</span>.<span class="n">getDuration</span>();        <span class="c">// Get total video duration in seconds</span>
+
+<span class="c">// Event listeners</span>
+<span class="n">player</span>.<span class="n">on</span>(<span class="s">'timeupdate'</span>, ({ <span class="n">currentTime</span>, <span class="n">duration</span> }) => {
+  <span class="n">console</span>.<span class="n">log</span>(<span class="s">'Current time:'</span>, <span class="n">currentTime</span>);
+  <span class="n">console</span>.<span class="n">log</span>(<span class="s">'Duration:'</span>, <span class="n">duration</span>);
+});
+
+<span class="n">player</span>.<span class="n">on</span>(<span class="s">'durationchange'</span>, ({ <span class="n">duration</span> }) => {
+  <span class="n">console</span>.<span class="n">log</span>(<span class="s">'Duration changed:'</span>, <span class="n">duration</span>);
+});
+
+<span class="c">// Remove event listener</span>
+<span class="k">const</span> <span class="n">timeHandler</span> = (<span class="n">data</span>) => <span class="n">console</span>.<span class="n">log</span>(<span class="n">data</span>.<span class="n">currentTime</span>);
+<span class="n">player</span>.<span class="n">on</span>(<span class="s">'timeupdate'</span>, <span class="n">timeHandler</span>);
+<span class="n">player</span>.<span class="n">off</span>(<span class="s">'timeupdate'</span>, <span class="n">timeHandler</span>);  <span class="c">// Remove specific listener</span>
+
+<span class="c">// Destroy player and cleanup</span>
 <span class="n">player</span>.<span class="n">destroy</span>();</code></pre>
+
+    <h3>Time Tracking Example</h3>
+    <p>Complete example showing how to track playback progress with console logging:</p>
+    <pre><button class="copy-btn" data-target="code8">Copy</button><code id="code8"><span class="k">const</span> <span class="n">player</span> = <span class="n">RezePlayer</span>.<span class="n">make</span>(<span class="s">'#player'</span>, {
+  <span class="n">title</span>: <span class="s">'My Video'</span>,
+  <span class="n">servers</span>: [
+    {
+      <span class="n">name</span>: <span class="s">'Server 1'</span>,
+      <span class="n">url</span>: <span class="s">'https://rezeplayer.vercel.app/reze/hls/master.m3u8'</span>,
+      <span class="n">type</span>: <span class="s">'hls'</span>
+    }
+  ],
+  <span class="n">posterUrl</span>: <span class="s">'https://rezeplayer.vercel.app/reze/poster.png'</span>,  <span class="c">// Optional poster</span>
+  <span class="n">enableCast</span>: <span class="k">true</span>  <span class="c">// Enable Chromecast</span>
+});
+
+<span class="c">// Time tracking - Log every 1 second to avoid spam</span>
+<span class="k">let</span> <span class="n">lastLogTime</span> = <span class="l">0</span>;
+<span class="n">player</span>.<span class="n">on</span>(<span class="s">'timeupdate'</span>, ({ <span class="n">currentTime</span>, <span class="n">duration</span> }) => {
+  <span class="c">// Only log once per second</span>
+  <span class="k">if</span> (<span class="n">Math</span>.<span class="n">floor</span>(<span class="n">currentTime</span>) !== <span class="n">lastLogTime</span>) {
+    <span class="n">lastLogTime</span> = <span class="n">Math</span>.<span class="n">floor</span>(<span class="n">currentTime</span>);
+    <span class="k">const</span> <span class="n">progress</span> = (<span class="n">currentTime</span> / <span class="n">duration</span>) * <span class="l">100</span>;
+    <span class="n">console</span>.<span class="n">log</span>(<span class="s">`[RezePlayer Time Tracking]`</span>);
+    <span class="n">console</span>.<span class="n">log</span>(<span class="s">`  Current Time: ${formatTime(currentTime)}`</span>);
+    <span class="n">console</span>.<span class="n">log</span>(<span class="s">`  Duration: ${formatTime(duration)}`</span>);
+    <span class="n">console</span>.<span class="n">log</span>(<span class="s">`  Progress: ${progress.toFixed(2)}%`</span>);
+  }
+});
+
+<span class="c">// Log when duration changes (video loaded)</span>
+<span class="n">player</span>.<span class="n">on</span>(<span class="s">'durationchange'</span>, ({ <span class="n">currentTime</span>, <span class="n">duration</span> }) => {
+  <span class="n">console</span>.<span class="n">log</span>(<span class="s">`[RezePlayer Duration Change]`</span>);
+  <span class="n">console</span>.<span class="n">log</span>(<span class="s">`  Video Duration: ${formatTime(duration)}`</span>);
+  <span class="n">console</span>.<span class="n">log</span>(<span class="s">`  Current Time: ${formatTime(currentTime)}`</span>);
+});
+
+<span class="c">// Helper function to format time</span>
+<span class="k">function</span> <span class="n">formatTime</span>(<span class="n">seconds</span>) {
+  <span class="k">const</span> <span class="n">mins</span> = <span class="n">Math</span>.<span class="n">floor</span>(<span class="n">seconds</span> / <span class="l">60</span>);
+  <span class="k">const</span> <span class="n">secs</span> = <span class="n">Math</span>.<span class="n">floor</span>(<span class="n">seconds</span> % <span class="l">60</span>);
+  <span class="k">return</span> <span class="s">`${mins}:${secs.toString().padStart(2, '0')}`</span>;
+}</code></pre>
     <div class="note">
       <p>⚠️ <strong>Note:</strong> The player uses **scoped CSS** to avoid conflicts with your page styles. All player-specific styles are contained within the main player container.</p>
     </div>
-    <div class="made-with-love">
-      Made with <span>❤️</span> by R
+    <div class="note">
+      <p>⚠️ <strong>Note:</strong> WILL ADVICE U TO KEEP THE THUMB INTERVAL 10s OR HIGHER TO AVOID PERFORMANCE ISSUES (MEMORY LEAK)</p>
     </div>
+<div class="made-with-love">
+  Made with <span>❤️</span> by 
+  <a href="https://github.com/rishabnotfound" target="_blank">R</a>
+</div>
+
+    
   </div>
 
   <script>

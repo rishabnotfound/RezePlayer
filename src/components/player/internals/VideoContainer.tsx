@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useRef } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 import { makeVideoElementDisplayInterface } from "@/components/player/display/base";
 import { convertSubtitlesToObjectUrl } from "@/components/player/utils/captions";
@@ -68,10 +68,15 @@ function VideoElement() {
   const srtData = usePlayerStore((s) => s.caption.selected?.srtData);
   const captionAsTrack = usePlayerStore((s) => s.caption.asTrack);
   const language = usePlayerStore((s) => s.caption.selected?.language);
+  const isFullscreen = usePlayerStore((s) => s.interface.isFullscreen);
   const trackObjectUrl = useObjectUrl(
     () => (srtData ? convertSubtitlesToObjectUrl(srtData) : null),
     [srtData],
   );
+
+  // Get poster URL from config
+  const config = (window as any).__REZEPLAYER_CONFIG__;
+  const posterUrl = config?.settings?.posterUrl;
 
   // report video element to display interface
   useEffect(() => {
@@ -101,10 +106,11 @@ function VideoElement() {
 
   return (
     <video
-      className="absolute inset-0 w-full h-screen bg-black"
+      className={`absolute inset-0 w-full h-screen bg-black ${isFullscreen ? 'object-cover' : 'object-contain'}`}
       autoPlay
       playsInline
       ref={videoEl}
+      poster={posterUrl}
     >
       {subtitleTrack}
     </video>

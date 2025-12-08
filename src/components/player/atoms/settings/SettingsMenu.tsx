@@ -52,6 +52,7 @@ export function SettingsMenu({ id }: { id: string }) {
   // Check if watch party is enabled from config
   const config = (window as any).__REZEPLAYER_CONFIG__;
   const enableWatchParty = config?.settings?.enableWatchParty ?? true;
+  const enableCast = config?.settings?.enableCast ?? true;
 
   const handleWatchPartyClick = () => {
     if (downloadUrl) {
@@ -59,6 +60,13 @@ export function SettingsMenu({ id }: { id: string }) {
         downloadUrl,
       )}`;
       window.open(watchPartyUrl);
+    }
+  };
+
+  const handleChromecastClick = () => {
+    const castButton = document.querySelector("google-cast-launcher") as HTMLElement;
+    if (castButton) {
+      castButton.click();
     }
   };
   return (
@@ -96,6 +104,15 @@ export function SettingsMenu({ id }: { id: string }) {
             className={downloadable ? "opacity-100" : "opacity-50"}
           >
             {t("Watch Party")}
+          </Menu.Link>
+        )}
+        {enableCast && (
+          <Menu.Link
+            clickable
+            onClick={handleChromecastClick}
+            rightSide={<Icon className="text-xl" icon={Icons.CASTING} />}
+          >
+            {t("Chromecast")}
           </Menu.Link>
         )}
       </Menu.Section>

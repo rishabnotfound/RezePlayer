@@ -32,10 +32,10 @@ For a clean, full-page player experience, add the data-full attribute to your ro
 
 ```html
 <!-- Include CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.10/dist/assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.11/dist/assets/style.css">
 
 <!-- Include JS -->
-<script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.10/dist/rezeplayer.iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.11/dist/rezeplayer.iife.js"></script>
 ```
 
 ### 3. Add Container
@@ -72,7 +72,9 @@ RezePlayer.make('#player', {
   autoPlay: true, //depends on browser policies
   volume: 1, //range is 0 to 1
   startTime: 0, //start position in seconds
-  enableWatchParty: true //default is true
+  enableWatchParty: true, //default is true
+  themeColor: '8652bb', //default is 8652bb
+  thumbsInterval: 10000 //thumbnail generation interval in ms (default: 10000 = 10s)
 });
 ```
 
@@ -110,13 +112,13 @@ const player = make('#player', {
   <title>RezePlayer Example</title>
 
   <!-- Include RezePlayer CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.10/dist/assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.11/dist/assets/style.css">
 </head>
 <body>
   <div id="root"></div>
 
   <!-- Include RezePlayer JS -->
-  <script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.10/dist/rezeplayer.iife.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.11/dist/rezeplayer.iife.js"></script>
 
   <script>
     RezePlayer.make('#root', {
@@ -171,10 +173,14 @@ const player = make('#player', {
           src: 'https://rezeplayer.vercel.app/reze/subs/arabic.vtt',
         }
       ],
-      autoPlay: true, //depends on browser 
+      posterUrl: 'https://rezeplayer.vercel.app/reze/poster.png', //optional
+      autoPlay: true, //depends on browser
       volume: 1, //range is from 0 to 1 it can be float too
       startTime: 0, //time is in seconds
-      enableWatchParty: true //default is true
+      enableWatchParty: true, //default is true
+      enableCast: true, //default is true
+      themeColor: '8652bb', //default is 8652bb
+      thumbsInterval: 10000 //thumbnail generation interval in ms (default: 10000 = 10s)
     });
   </script>
 </body>
@@ -194,6 +200,10 @@ const player = make('#player', {
 | `volume` | `Number` | `1` | Initial volume (0-1) |
 | `startTime` | `Number` | `0` | Start position in seconds |
 | `enableWatchParty` | `Boolean` | `true` | Enable watch party feature |
+| `enableCast` | `Boolean` | `true` | Enable Chromecast feature |
+| `posterUrl` | `String` | `undefined` | Poster image URL to display before video plays |
+| `themeColor` | `String` | `undefined` | Custom theme color (hex without #, e.g., "e01621") for progress bars, switches, and checkmarks |
+| `thumbsInterval` | `Number` | `10000` | Thumbnail generation interval in milliseconds (e.g., 10000 = 10 seconds) (WILL ADVICE U TO KEEP THE THUMB INTERVAL 10s OR HIGHER TO AVOID PERFORMANCE ISSUES LIKE MEMORY LEAK) |
 
 ### Server Object
 
@@ -231,8 +241,79 @@ player.seek(120);        // Seek to 2 minutes
 // Volume
 player.setVolume(0.5);   // Set 50% volume
 
+// Time tracking
+const currentTime = player.getCurrentTime();  // Get current playback time in seconds
+const duration = player.getDuration();        // Get total video duration in seconds
+
+// Event listeners
+player.on('timeupdate', (data) => {
+  console.log('Current time:', data.currentTime);
+  console.log('Duration:', data.duration);
+});
+
+player.on('durationchange', (data) => {
+  console.log('Duration changed:', data.duration);
+});
+
+// Remove event listener
+const timeHandler = (data) => console.log(data.currentTime);
+player.on('timeupdate', timeHandler);
+player.off('timeupdate', timeHandler);  // Remove specific listener
+
 // Cleanup
-player.destroy();        // Remove player
+player.destroy();        // Remove player and all event listeners
+```
+
+### Event Listeners
+
+| Event | Description | Data |
+|-------|-------------|------|
+| `timeupdate` | Fired when playback time changes | `{ currentTime: number, duration: number }` |
+| `durationchange` | Fired when video duration is determined | `{ currentTime: number, duration: number }` |
+
+### Complete Example with Time Tracking
+
+```javascript
+const player = RezePlayer.make('#player', {
+  title: 'My Video',
+  servers: [
+    {
+      name: 'Server 1',
+      url: 'https://rezeplayer.vercel.app/reze/hls/master.m3u8',
+      type: 'hls'
+    }
+  ],
+  posterUrl: 'https://rezeplayer.vercel.app/reze/poster.png',  // Optional poster image
+  enableCast: true  // Enable Chromecast (default: true)
+});
+
+// Time tracking - Log every 1 second to avoid spam
+let lastLogTime = 0;
+player.on('timeupdate', ({ currentTime, duration }) => {
+  // Only log once per second
+  if (Math.floor(currentTime) !== lastLogTime) {
+    lastLogTime = Math.floor(currentTime);
+    const progress = (currentTime / duration) * 100;
+    console.log(`[RezePlayer Time Tracking]`);
+    console.log(`  Current Time: ${formatTime(currentTime)}`);
+    console.log(`  Duration: ${formatTime(duration)}`);
+    console.log(`  Progress: ${progress.toFixed(2)}%`);
+  }
+});
+
+// Log when duration changes (video loaded)
+player.on('durationchange', ({ currentTime, duration }) => {
+  console.log(`[RezePlayer Duration Change]`);
+  console.log(`  Video Duration: ${formatTime(duration)}`);
+  console.log(`  Current Time: ${formatTime(currentTime)}`);
+});
+
+// Helper function to format time
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 ```
 
 ## Full Page Mode

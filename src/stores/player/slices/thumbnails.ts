@@ -81,6 +81,24 @@ export const createThumbnailSlice: MakeSlice<ThumbnailSlice> = (set, get) => ({
     },
     addImage(img) {
       const store = get();
+
+      // Get thumbnail interval from config (in milliseconds), convert to seconds
+      const config = (window as any).__REZEPLAYER_CONFIG__;
+      const THUMBNAIL_INTERVAL = (config?.settings?.thumbsInterval || 10000) / 1000; // Convert ms to seconds
+
+      // Round timestamp to nearest interval to prevent excessive thumbnail generation
+      const roundedTime = Math.floor(img.at / THUMBNAIL_INTERVAL) * THUMBNAIL_INTERVAL;
+
+      // Check if we already have a thumbnail close to this time (within interval)
+      const existingNearby = store.thumbnails.images.find(
+        (v) => Math.abs(v.at - roundedTime) < THUMBNAIL_INTERVAL
+      );
+
+      // Skip adding if we already have a thumbnail in this interval
+      if (existingNearby && Math.abs(existingNearby.at - img.at) < THUMBNAIL_INTERVAL) {
+        return;
+      }
+
       const exactOrPastImageIndex = store.thumbnails.images.findIndex(
         (v) => v.at >= img.at,
       );

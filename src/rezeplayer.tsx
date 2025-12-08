@@ -38,6 +38,10 @@ export interface RezePlayerOptions {
   volume?: number;
   startTime?: number;
   enableWatchParty?: boolean;  // Enable/disable watch party feature
+  enableCast?: boolean;  // Enable/disable chromecast feature (default: true)
+  posterUrl?: string;  // Poster image URL to display before video plays
+  themeColor?: string;  // Theme color for UI elements (hex value without #, e.g., "e01621")
+  thumbsInterval?: number;  // Thumbnail generation interval in milliseconds (default: 10000 = 10s)
 }
 
 export interface RezePlayerInstance {
@@ -46,12 +50,18 @@ export interface RezePlayerInstance {
   pause: () => void;
   setVolume: (volume: number) => void;
   seek: (time: number) => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  on: (event: 'timeupdate' | 'durationchange', callback: (data: { currentTime: number; duration: number }) => void) => void;
+  off: (event: 'timeupdate' | 'durationchange', callback: (data: { currentTime: number; duration: number }) => void) => void;
 }
 
 class RezePlayer {
   private container: HTMLElement;
   private root: any;
   private options: RezePlayerOptions;
+  private eventListeners: Map<string, Set<Function>> = new Map();
+  private unsubscribe: (() => void) | null = null;
 
   constructor(selector: string | HTMLElement, options: RezePlayerOptions) {
     // Get container element
@@ -94,11 +104,49 @@ class RezePlayer {
         defaultVolume: this.options.volume ?? 1,
         startTime: this.options.startTime ?? 0,
         enableWatchParty: this.options.enableWatchParty ?? true,
+        enableCast: this.options.enableCast ?? true,
+        posterUrl: this.options.posterUrl,
+        themeColor: this.options.themeColor,
+        thumbsInterval: this.options.thumbsInterval ?? 10000,  // Default 10 seconds
       },
     };
 
     // Add data-rezeplayer attribute to container for CSS scoping
     this.container.setAttribute('data-rezeplayer', 'true');
+
+    // Apply theme color if provided
+    if (this.options.themeColor) {
+      const color = this.options.themeColor.startsWith('#')
+        ? this.options.themeColor
+        : `#${this.options.themeColor}`;
+
+      // Inject theme color CSS
+      const styleId = 'rezeplayer-theme-override';
+      let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+
+      if (!styleElement) {
+        styleElement = document.createElement('style');
+        styleElement.id = styleId;
+        document.head.appendChild(styleElement);
+      }
+
+      // Convert hex to RGB for CSS variables
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      const rgb = `${r} ${g} ${b}`;
+
+      styleElement.textContent = `
+        [data-rezeplayer="true"] {
+          --colors-buttons-toggle: ${rgb} !important;
+          --colors-progress-filled: ${rgb} !important;
+          --colors-video-audio-set: ${rgb} !important;
+          --colors-video-context-sliderFilled: ${rgb} !important;
+          --colors-video-context-type-accent: ${rgb} !important;
+        }
+      `;
+    }
 
     // Create root and render
     this.root = createRoot(this.container);
@@ -113,6 +161,38 @@ class RezePlayer {
         </HelmetProvider>
       </StrictMode>
     );
+
+    // Subscribe to store changes for time updates
+    this.setupTimeTracking();
+  }
+
+  private setupTimeTracking() {
+    let lastTime = 0;
+    let lastDuration = 0;
+
+    this.unsubscribe = usePlayerStore.subscribe((state) => {
+      const currentTime = state.progress.time;
+      const duration = state.progress.duration;
+
+      // Emit timeupdate event when time changes
+      if (currentTime !== lastTime) {
+        lastTime = currentTime;
+        this.emit('timeupdate', { currentTime, duration });
+      }
+
+      // Emit durationchange event when duration changes
+      if (duration !== lastDuration) {
+        lastDuration = duration;
+        this.emit('durationchange', { currentTime, duration });
+      }
+    });
+  }
+
+  private emit(event: string, data: any) {
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      listeners.forEach(callback => callback(data));
+    }
   }
 
   private detectStreamType(url: string): 'hls' | 'mp4' {
@@ -121,9 +201,13 @@ class RezePlayer {
   }
 
   public destroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
     if (this.root) {
       this.root.unmount();
     }
+    this.eventListeners.clear();
   }
 
   public play() {
@@ -145,6 +229,30 @@ class RezePlayer {
     const store = usePlayerStore.getState();
     store.display?.setTime(time);
   }
+
+  public getCurrentTime(): number {
+    const store = usePlayerStore.getState();
+    return store.progress.time;
+  }
+
+  public getDuration(): number {
+    const store = usePlayerStore.getState();
+    return store.progress.duration;
+  }
+
+  public on(event: 'timeupdate' | 'durationchange', callback: (data: { currentTime: number; duration: number }) => void) {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, new Set());
+    }
+    this.eventListeners.get(event)!.add(callback);
+  }
+
+  public off(event: 'timeupdate' | 'durationchange', callback: (data: { currentTime: number; duration: number }) => void) {
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      listeners.delete(callback);
+    }
+  }
 }
 
 // Export factory function
@@ -156,6 +264,10 @@ export function make(selector: string | HTMLElement, options: RezePlayerOptions)
     pause: () => player.pause(),
     setVolume: (volume: number) => player.setVolume(volume),
     seek: (time: number) => player.seek(time),
+    getCurrentTime: () => player.getCurrentTime(),
+    getDuration: () => player.getDuration(),
+    on: (event: 'timeupdate' | 'durationchange', callback: (data: { currentTime: number; duration: number }) => void) => player.on(event, callback),
+    off: (event: 'timeupdate' | 'durationchange', callback: (data: { currentTime: number; duration: number }) => void) => player.off(event, callback),
   };
 }
 

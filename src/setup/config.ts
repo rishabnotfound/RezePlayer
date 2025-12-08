@@ -1,9 +1,9 @@
 import {
   APP_VERSION,
-  BACKEND_URL,
+  //BACKEND_URL,
   DISCORD_LINK,
   GITHUB_LINK,
-  TWITTER_LINK,
+  //TWITTER_LINK,
 } from "./constants";
 
 interface Config {
@@ -92,7 +92,7 @@ export function conf(): RuntimeConfig {
     APP_VERSION,
     GITHUB_LINK,
     DISCORD_LINK,
-    TWITTER_LINK,
+    //TWITTER_LINK,
     DMCA_EMAIL: getKey("DMCA_EMAIL"),
     ONBOARDING_CHROME_EXTENSION_INSTALL_LINK: getKey(
       "ONBOARDING_CHROME_EXTENSION_INSTALL_LINK",
@@ -103,7 +103,7 @@ export function conf(): RuntimeConfig {
       "https://docs.undi.rest/extension",
     ),
     ONBOARDING_PROXY_INSTALL_LINK: getKey("ONBOARDING_PROXY_INSTALL_LINK"),
-    BACKEND_URL: getKey("BACKEND_URL", BACKEND_URL),
+    //BACKEND_URL: getKey("BACKEND_URL", BACKEND_URL),
     TMDB_READ_API_KEY: getKey("TMDB_READ_API_KEY"),
     PROXY_URLS: getKey("CORS_PROXY_URL", "")
       .split(",")

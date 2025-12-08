@@ -19,6 +19,9 @@ export function Time(props: { short?: boolean }) {
   const hasHours = durationExceedsHour(timeDuration);
 
   function toggleMode() {
+    // Don't toggle if in short mode
+    if (props.short) return;
+
     setTimeFormat(
       timeFormat === VideoPlayerTimeFormat.REGULAR
         ? VideoPlayerTimeFormat.REMAINING
@@ -40,14 +43,19 @@ export function Time(props: { short?: boolean }) {
   const timeFinished = new Date(Date.now() + secondsRemaining * 1e3);
   const duration = formatSeconds(timeDuration, hasHours);
 
+  // If short mode, always show "xx:yy / xx:yy" format
+  if (props.short) {
+    return (
+      <VideoPlayerButton onClick={() => toggleMode()}>
+        <span>
+          {timeWatched} / {duration}
+        </span>
+      </VideoPlayerButton>
+    );
+  }
+
   let localizationKey =
     timeFormat === VideoPlayerTimeFormat.REGULAR ? "regular" : "remaining";
-  if (props.short) {
-    localizationKey =
-      timeFormat === VideoPlayerTimeFormat.REGULAR
-        ? "shortRegular"
-        : "shortRemaining";
-  }
 
   return (
     <VideoPlayerButton onClick={() => toggleMode()}>

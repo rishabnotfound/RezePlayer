@@ -1,7 +1,7 @@
 {
   "name": "rezeplayer",
   "author": "rishabnotofound",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "Professional HLS/MP4 video player with subtitle support",
   "homepage": "https://github.com/rishabnotfound/RezePlayer",
   "main": "dist/rezeplayer.umd.js",

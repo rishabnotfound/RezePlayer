@@ -87,8 +87,11 @@ class ThumnbnailWorker {
       this.videoEl?.addEventListener("error", onError);
     });
     if (!this.videoEl || !this.canvasEl) return;
-    this.canvasEl.height = this.videoEl.videoHeight;
-    this.canvasEl.width = this.videoEl.videoWidth;
+    // Scale down to max 160px width for smaller thumbnails (saves ~90% memory)
+    const MAX_WIDTH = 160;
+    const aspectRatio = this.videoEl.videoHeight / this.videoEl.videoWidth;
+    this.canvasEl.width = MAX_WIDTH;
+    this.canvasEl.height = Math.floor(MAX_WIDTH * aspectRatio);
   }
 
   private async takeSnapshot(at: number) {
@@ -111,7 +114,8 @@ class ThumnbnailWorker {
       this.canvasEl.width,
       this.canvasEl.height,
     );
-    const imgUrl = this.canvasEl.toDataURL();
+    // Use JPEG with 60% quality instead of PNG for ~95% smaller file size
+    const imgUrl = this.canvasEl.toDataURL('image/jpeg', 0.6);
 
     if (this.interrupted) return;
     if (imgUrl === "data:," || !imgUrl) return; // failed image rendering
