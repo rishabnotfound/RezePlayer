@@ -80,12 +80,26 @@ export function QualityView({ id }: { id: string }) {
   // For MP4, hide quality selection since there's only one quality
   const isMp4 = sourceType === "mp4";
 
+  // Check if current quality is "Auto" (null or unknown)
+  const isAutoQuality = !currentQuality || currentQuality === "unknown";
+
   return (
     <>
       <Menu.BackLink onClick={() => router.navigate("/")}>
         {t("player.menus.quality.title")}
       </Menu.BackLink>
       <Menu.Section className="flex flex-col pb-4">
+        {/* Show Auto/Default option when no specific quality is set or for MP4 */}
+        {(isAutoQuality || isMp4) && (
+          <SelectableLink
+            key="auto"
+            selected={isAutoQuality}
+            disabled={isMp4}
+            onClick={isMp4 ? undefined : changeAutomatic}
+          >
+            {qualityToString(null, sourceType)}
+          </SelectableLink>
+        )}
         {visibleQualities.map((v) => (
           <SelectableLink
             key={v}

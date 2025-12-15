@@ -39,15 +39,21 @@ export interface CaptionListItem {
   type: "srt" | "vtt";
 }
 
+export interface AudioTrack {
+  id: string;
+  label?: string;
+  language: string;
+}
+
 export interface SourceSlice {
   status: PlayerStatus;
   meta: PlayerMeta | null;
   source: { type: string; url: string } | null;
   sourceId: string | null;
   currentQuality: string | null;
-  currentAudioTrack: { language: string; label?: string } | null;
+  currentAudioTrack: AudioTrack | null;
   qualities: any[];
-  audioTracks: any[];
+  audioTracks: AudioTrack[];
   caption: {
     selected: CaptionListItem | null;
     asTrack: boolean;

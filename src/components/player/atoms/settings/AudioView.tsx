@@ -50,22 +50,28 @@ export function AudioView({ id }: { id: string }) {
     <>
       <Menu.BackLink onClick={() => router.navigate("/")}>Audio</Menu.BackLink>
       <Menu.Section className="flex flex-col pb-4">
-        {audioTracks.map((v) => (
-          <AudioOption
-            key={v.id}
-            selected={v.id === currentAudioTrack?.id}
-            langCode={
-              v.language.length === 3
-                ? (iso6393To1[v.language] ?? v.language)
-                : v.language
-            }
-            onClick={audioTracks.includes(v) ? () => change(v) : undefined}
-          >
-            {getPrettyLanguageNameFromLocale(v.language) ??
-              v.label ??
-              unknownChoice}
+        {audioTracks.length === 0 ? (
+          <AudioOption selected={true}>
+            Default
           </AudioOption>
-        ))}
+        ) : (
+          audioTracks.map((v) => (
+            <AudioOption
+              key={v.id}
+              selected={v.id === currentAudioTrack?.id}
+              langCode={
+                v.language.length === 3
+                  ? (iso6393To1[v.language] ?? v.language)
+                  : v.language
+              }
+              onClick={audioTracks.includes(v) ? () => change(v) : undefined}
+            >
+              {getPrettyLanguageNameFromLocale(v.language) ??
+                v.label ??
+                unknownChoice}
+            </AudioOption>
+          ))
+        )}
       </Menu.Section>
     </>
   );

@@ -43,6 +43,7 @@ export interface RezePlayerOptions {
   themeColor?: string;  // Theme color for UI elements (hex value without #, e.g., "e01621")
   thumbsInterval?: number;  // Thumbnail generation interval in milliseconds (default: 10000 = 10s)
   thumbsGenerate?: boolean;  // Enable/disable thumbnail generation (default: true)
+  themeSettings?: boolean;  // Enable/disable appearance settings option in menu (default: true)
 }
 
 export interface RezePlayerInstance {
@@ -110,6 +111,7 @@ class RezePlayer {
         themeColor: this.options.themeColor,
         thumbsInterval: this.options.thumbsInterval ?? 10000,  // Default 10 seconds
         thumbsGenerate: this.options.thumbsGenerate ?? true,  // Default true
+        themeSettings: this.options.themeSettings ?? true,  // Default true
       },
     };
 

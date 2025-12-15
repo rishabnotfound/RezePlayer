@@ -7,21 +7,19 @@
   <meta name="description" content="RezePlayer Test" />
   <title>RezePlayer Testing</title>
 
-  <!-- Include RezePlayer CSS -->
-  <link rel="stylesheet" href="./dist/assets/style.css">
+  <!-- <link rel="stylesheet" href="./dist/assets/style.css"> -->
 
 </head>
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
 
-  <!-- Include RezePlayer JS -->
-  <script src="./dist/rezeplayer.iife.js"></script>
+  <script type="module">
+    import { make } from './src/rezeplayer.tsx';
 
-  <script>
     // Initialize RezePlayer with ALL servers from server.ts
     // User can switch between servers in the Sources menu
-    const player = RezePlayer.make('#root', {
+    const player = make('#root', {
       title: 'RezePlayer',
       servers: [
         {
@@ -80,6 +78,7 @@
       enableWatchParty: true,
       enableCast: true,
       thumbsGenerate: true, //default true
+      themeSettings: true, //default true
       //themeColor: 'e01621',
       thumbsInterval: 10000, // 10 seconds
     });

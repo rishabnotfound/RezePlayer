@@ -415,8 +415,8 @@
     <p>For a clean, full-page player experience, add the <code class="n">data-full</code> attribute to your root <code class="t">html</code> tag, or else player styling will be broken cuz of tailwind limitation of preflight lmao</p>
     <pre><button class="copy-btn" data-target="code5">Copy</button><code id="code5">&lt;<span class="t">html</span> <span class="a">lang</span>=<span class="s">"en"</span> <span class="a">data-full</span>&gt;</code></pre>
     <h3>2. Include CSS and JS</h3>
-    <pre><button class="copy-btn" data-target="code1">Copy</button><code id="code1">&lt;<span class="t">link</span> <span class="a">rel</span>=<span class="s">"stylesheet"</span> <span class="a">href</span>=<span class="s">""https://cdn.jsdelivr.net/npm/rezeplayer@1.1.12/dist/assets/style.css"</span>&gt;
-&lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://cdn.jsdelivr.net/npm/rezeplayer@1.1.12/dist/rezeplayer.iife.js"</span>&gt;&lt;/<span class="t">script</span>&gt;</code></pre>
+    <pre><button class="copy-btn" data-target="code1">Copy</button><code id="code1">&lt;<span class="t">link</span> <span class="a">rel</span>=<span class="s">"stylesheet"</span> <span class="a">href</span>=<span class="s">""https://cdn.jsdelivr.net/npm/rezeplayer@1.1.14/dist/assets/style.css"</span>&gt;
+&lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://cdn.jsdelivr.net/npm/rezeplayer@1.1.14/dist/rezeplayer.iife.js"</span>&gt;&lt;/<span class="t">script</span>&gt;</code></pre>
     <h3>3. Add Container</h3>
     <p>The player will be initialized inside this element.</p>
     <pre><button class="copy-btn" data-target="code2">Copy</button><code id="code2">&lt;<span class="t">div</span> <span class="a">id</span>=<span class="s">"player"</span>&gt;&lt;/<span class="t">div</span>&gt;</code></pre>
@@ -450,6 +450,7 @@
   <span class="n">startTime</span>: <span class="l">0</span>, //start position in seconds
   <span class="n">enableWatchParty</span>: <span class="k">true</span>, //default is true
   <span class="n">enableCast</span>: <span class="k">true</span>, //default is true
+  <span class="n">themeSettings</span>: <span class="k">true</span>, //default is true
   <span class="n">themeColor</span>: <span class="s">'8652bb'</span>, //default is 8652bb
   <span class="n">thumbsGenerate</span>: <span class="k">true</span>, //default is true
   <span class="n">thumbsInterval</span>: <span class="l">10000</span> //thumbnail interval in ms (default: 10000 = 10s) 
@@ -542,6 +543,14 @@
       </div>
       <div class="api-option-description">
         URL of poster image to display before video plays (optional).
+      </div>
+    </div>
+    <div class="api-option">
+      <div class="api-option-signature">
+        <code>themeSettings</code> <span class="highlight">Boolean</span>
+      </div>
+      <div class="api-option-description">
+        Enable Appearance Settings to adjust look (default: <code class="k">true</code>).
       </div>
     </div>
     <div class="api-option">

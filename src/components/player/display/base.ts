@@ -313,6 +313,14 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
       if (source?.type === "mp4") {
         emit("qualities", ["unknown"]);
         emit("changedquality", "unknown");
+        // MP4 files have a single default audio track
+        const defaultAudioTrack = {
+          id: "default",
+          label: "Default",
+          language: "unknown",
+        };
+        emit("audiotracks", [defaultAudioTrack]);
+        emit("changedaudiotrack", defaultAudioTrack);
       } else if (
         source?.type === "hls" &&
         videoElement &&
@@ -320,6 +328,14 @@ export function makeVideoElementDisplayInterface(): DisplayInterface {
       ) {
         emit("qualities", ["unknown"]);
         emit("changedquality", "unknown");
+        // Native HLS playback - emit default audio track
+        const defaultAudioTrack = {
+          id: "default",
+          label: "Default",
+          language: "unknown",
+        };
+        emit("audiotracks", [defaultAudioTrack]);
+        emit("changedaudiotrack", defaultAudioTrack);
       }
       emit("duration", videoElement?.duration ?? 0);
     },

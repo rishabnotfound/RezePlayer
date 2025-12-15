@@ -183,7 +183,7 @@ export const Icon = memo((props: IconProps) => {
   return (
     <span
       dangerouslySetInnerHTML={{ __html: iconList[props.icon] }} // eslint-disable-line react/no-danger
-      className={classNames(props.className, flipClass)}
+      className={classNames("rezeplayer-icon", props.className, flipClass)}
     />
   );
 });
