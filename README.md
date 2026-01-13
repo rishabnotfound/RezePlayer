@@ -31,17 +31,17 @@ A standalone HLS/MP4 video player with subtitle support, watch party, Chromecast
 ### 1. Full Page Mode IMPORTANT
 For a clean, full-page player experience, add the data-full attribute to your root html tag, or else player styling will be broken cuz of tailwind limitation of preflight lmao
 ```html
-<html lang="en" data-full>
+<html lang="en" dir="ltr" data-full>
 ```
 
 ### 2. Include CSS and JS
 
 ```html
 <!-- Include CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.14/dist/assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@latest/dist/assets/style.css">
 
 <!-- Include JS -->
-<script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.14/dist/rezeplayer.iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rezeplayer@latest/dist/rezeplayer.iife.js"></script>
 ```
 
 ### 3. Add Container
@@ -120,13 +120,13 @@ const player = make('#player', {
   <title>RezePlayer Example</title>
 
   <!-- Include RezePlayer CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.14/dist/assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rezeplayer@latest/dist/assets/style.css">
 </head>
 <body>
   <div id="root"></div>
 
   <!-- Include RezePlayer JS -->
-  <script src="https://cdn.jsdelivr.net/npm/rezeplayer@1.1.14/dist/rezeplayer.iife.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/rezeplayer@latest/dist/rezeplayer.iife.js"></script>
 
   <script>
     RezePlayer.make('#root', {
